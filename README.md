@@ -59,10 +59,10 @@ The core functionality of the tool requires the associated binaries to be in the
      - [ ] GUI
 
 Legend:
-- [X] - Completed
+- - [X] - Completed
 - &#9746; - Partially Completed
 - [-] - Started
-- [ ] - Not Started
+- - [ ] - Not Started
 
 Known Issues:
   1. Windows PowerShell Script
