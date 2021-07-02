@@ -1,7 +1,7 @@
 ### BattleField-Triage (BFT) ###
 Forensic Triage Toolset
 
-Background: 
+### Background: 
 
     ######################################################################
     ### The name and the methodology stems from a need to be able to   ###
@@ -13,7 +13,7 @@ Background:
     ### F-Response, KAPE, etc.                                         ###
     ######################################################################
 
-DESCRIPTION:
+### DESCRIPTION:
 
     ######################################################################
     ### SYNOPSIS:    Collection Starts Either Automated (With Switch), ###
@@ -30,7 +30,7 @@ DESCRIPTION:
 The core functionality of the tool requires the associated binaries to be in the ./src/ directory. Plan accordingly prior to running. 
 - Test software and script prior to using in a live enviorment
 
-### REQUIREMENTS: ###<br />
+### REQUIREMENTS: <br />
 *Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
    *> ./BATTLEFIELD_TRIAGE.ps1<br/>
       *> ./src/<br/>
