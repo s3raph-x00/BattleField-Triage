@@ -34,16 +34,19 @@ The core functionality of the tool requires the associated binaries to be in the
   1. Windows PowerShell Script
      - [X] Core Functionality
        - &#9746; Additional Triage Sources   
+       - &#9746; Switches and Parametization
        - &#9746; Testing
      - [ ] GUI   
   2. Linux/Unix Python Script
      - [ ] Core Functionality
        - [ ] Additional Triage Sources   
+       - [ ] Switches and Parametization
        - [ ] Testing
      - [ ] GUI   
   3. OSX Script
      - [ ] Core Functionality
        - [ ] Additional Triage Sources   
+       - [ ] Switches and Parametization
        - [ ] Testing
      - [ ] GUI   
   4. Companion Analysis Tool
