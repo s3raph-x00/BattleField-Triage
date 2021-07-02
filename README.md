@@ -33,22 +33,16 @@ The core functionality of the tool requires the associated binaries to be in the
 ### REQUIREMENTS: <br />
 Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
 <blockquote>
-#   > ./BATTLEFIELD_TRIAGE.ps1<br/>
-#      > ./src/<br/>
-#         > ./src/DumpIt/DumpIt.exe<br/>
-#         > ./src/ftk/ftkimager.exe<br/>
-#            (andallotherassociatedftkimager(CLI)Files)<br/>
-#         >./src/man/helper.bat<br/>
-#            (andallotherassociatedMandiantRedlineCollectorFiles)<br/>
-#         >./src/RamCapture/x64/RamCapture64.exe<br/>
-#            (andallotherassociatedRamCatcherFiles)<br/>
-#         >./src/RamCapture/x86/RamCapture86.exe<br/>
-#            (andallotherassociatedRamCatcherFiles)<br/>
-#         >./src/Surge/surgecollect.exe<br/>
-#            (andallotherassociatedSurgeCollectorProFiles)<br/>
-#         >./src/winpmem.exe<br/>
-#         >./src/memoryze/Memoryze.exe<br/>
-#            (andallotherassociatedMandiantMemoryzeFiles)<br/>
+#   ./BATTLEFIELD_TRIAGE.ps1<br/>
+#      ./src/<br/>
+#         ./src/DumpIt/DumpIt.exe<br/>
+#         ./src/ftk/ftkimager.exe<br/>
+#         ./src/man/helper.bat<br/>
+#         ./src/RamCapture/x64/RamCapture64.exe<br/>
+#         ./src/RamCapture/x86/RamCapture86.exe<br/>
+#         ./src/Surge/surgecollect.exe<br/>
+#         ./src/winpmem.exe<br/>
+#         ./src/memoryze/Memoryze.exe<br/>
 </blockquote>
 
     
