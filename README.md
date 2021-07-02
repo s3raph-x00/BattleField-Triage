@@ -31,10 +31,10 @@ The core functionality of the tool requires the associated binaries to be in the
 - Test software and script prior to using in a live enviorment
 
 REQUIREMENTS:
-    #    Note: Store Associated Binaries In The Following Folder Structure:
-    #           => ./BATTLEFIELD_TRIAGE.ps1
-    #           ===> ./src/
-    #           ===========> ./src/DumpIt/DumpIt.exe
+    #    Note: Store Associated Binaries In The Following Folder Structure: /r/n
+    #           => ./BATTLEFIELD_TRIAGE.ps1 /r/n
+    #           ===> ./src/ /r/n
+    #           ===========> ./src/DumpIt/DumpIt.exe /r/n
     #           ===========> ./src/ftk/ftkimager.exe
     #                              (and all other associated ftkimager (CLI) Files)
     #           ===========> ./src/man/helper.bat 
