@@ -102,10 +102,10 @@ When updating various binaries (winpmem for example), ensure the name matches wh
   
    ![image](https://user-images.githubusercontent.com/27127072/124299452-6df85500-db2b-11eb-9795-d6edbabf880b.png)
    
-### Where To Get The Core Binaries:
-winpmem: https://github.com/Velocidex/WinPmem
-memoryze: https://www.fireeye.com/services/freeware/memoryze.html
-ramcapture: https://belkasoft.com/ram-capturer
-Surge Collect Pro <Not Free>: https://www.volexity.com/products-overview/surge/
-FTK Imager (CLI): https://accessdata.com/product-download/ftk-imager-version-4-5
-RedLine Collector: https://www.fireeye.com/services/freeware/redline.html
+### Where To Get The Core Binaries: <br />
+winpmem: https://github.com/Velocidex/WinPmem <br />
+memoryze: https://www.fireeye.com/services/freeware/memoryze.html <br />
+ramcapture: https://belkasoft.com/ram-capturer <br />
+Surge Collect Pro <Not Free>: https://www.volexity.com/products-overview/surge/ <br />
+FTK Imager (CLI): https://accessdata.com/product-download/ftk-imager-version-4-5 <br />
+RedLine Collector: https://www.fireeye.com/services/freeware/redline.html <br />
