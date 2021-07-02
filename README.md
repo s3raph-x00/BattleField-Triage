@@ -1,4 +1,4 @@
-### BattleField-Triage (BFT) ###
+## BattleField-Triage (BFT) ###
 Forensic Triage Toolset
 
 ### Background: 
@@ -50,7 +50,7 @@ The core functionality of the tool requires the associated binaries to be in the
             (andallotherassociatedMandiantMemoryzeFiles)<br/>
 
     
-### Current Development Status ###
+### Current Development Status 
   1. Windows PowerShell Script
      - [X] Core Functionality <br />
        &#9746; Additional Triage Sources   
@@ -81,12 +81,12 @@ The core functionality of the tool requires the associated binaries to be in the
      - [ ] Testing
      - [ ] GUI
 
-Legend:
+##### Legend:
 - - [X] - Completed <br />
 &#9746; - Partially Completed
 - - [ ] - Not Started
 
-Known Issues:
+##### Known Issues:
   1. Windows PowerShell Script
      - [ ] Red Line's Folder Creation For Artifact Is A Few Seconds Off Which Causes It To Create A Seperate Folder.
      - [ ] GPResult Does Not Dump Into Appropriate XML Format.
@@ -96,7 +96,7 @@ Known Issues:
   4. Companion Analysis Tool
   5. ELK/Splunk Linkage Tool
 
-### Updating The Core Binaries ###
+### Updating The Core Binaries
 
 When updating various binaries (winpmem for example), ensure the name matches what is currently in the directory and copy over any associated .dll file. 
 
