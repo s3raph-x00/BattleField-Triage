@@ -31,30 +31,31 @@ The core functionality of the tool requires the associated binaries to be in the
 - Test software and script prior to using in a live enviorment
 
 REQUIREMENTS: <br />
-    #    Note: Store Associated Binaries In The Following Folder Structure: <br />
-    #           => ./BATTLEFIELD_TRIAGE.ps1 <br />
-    #           ===> ./src/ <br />
-    #           ===========> ./src/DumpIt/DumpIt.exe <br />
-    #           ===========> ./src/ftk/ftkimager.exe <br />
-    #                              (and all other associated ftkimager (CLI) Files) <br />
-    #           ===========> ./src/man/helper.bat <br />
-    #                             (and all other associated Mandiant Redline Collector Files) <br />
-    #           ===========> ./src/RamCapture/x64/RamCapture64.exe <br />
-    #                              (and all other associated RamCatcher Files) <br />
-    #           ===========> ./src/RamCapture/x86/RamCapture86.exe <br />
-    #                              (and all other associated RamCatcher Files) <br />
-    #           ===========> ./src/Surge/surge=collect.exe <br />
-    #                              (and all other associated Surge Collector Pro Files) <br />
-    #           ===========> ./src/winpmem.exe <br />
-    #           ===========> ./src/memoryze/Memoryze.exe <br />
-    #                              (and all other associated Mandiant Memoryze Files) <br />
+#*Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
+#   *> ./BATTLEFIELD_TRIAGE.ps1<br/>
+#      *> ./src/<br/>
+#         *> ./src/DumpIt/DumpIt.exe<br/>
+#         *> ./src/ftk/ftkimager.exe<br/>
+#            *(andallotherassociatedftkimager(CLI)Files)<br/>
+#         *>./src/man/helper.bat<br/>
+#            (andallotherassociatedMandiantRedlineCollectorFiles)<br/>
+#         *>./src/RamCapture/x64/RamCapture64.exe<br/>
+#            (andallotherassociatedRamCatcherFiles)<br/>
+#         *>./src/RamCapture/x86/RamCapture86.exe<br/>
+#            (andallotherassociatedRamCatcherFiles)<br/>
+#         *>./src/Surge/surgecollect.exe<br/>
+#            (andallotherassociatedSurgeCollectorProFiles)<br/>
+#         *>./src/winpmem.exe<br/>
+#         *>./src/memoryze/Memoryze.exe<br/>
+#            (andallotherassociatedMandiantMemoryzeFiles)<br/>
+
     
 ### Current Development Status ###
   1. Windows PowerShell Script
-     - [X] Core Functionality
-       - &#9746; Additional Triage Sources   
-       - &#9746; Switches and Parametization
-       - &#9746; Testing
+     - [X] Core Functionality <br />
+       &#9746; Additional Triage Sources   
+       &#9746; Switches and Parametization
+       &#9746; Testing
      - [ ] GUI   
   2. Linux/Unix Python Script
      - [ ] Core Functionality
@@ -81,8 +82,8 @@ REQUIREMENTS: <br />
      - [ ] GUI
 
 Legend:
-- - [X] - Completed
--  &#9746; - Partially Completed
+- - [X] - Completed <br />
+&#9746; - Partially Completed
 - - [ ] - Not Started
 
 Known Issues:
