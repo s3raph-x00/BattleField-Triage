@@ -11,7 +11,7 @@ Forensic Triage Toolset
     ### have tried to take various lessons I have learned the hard way ###
     ### and standardize the apporach for organizations needing an open ###
     ### source solution in areas that lack enterprise solutions.       ###
-    ### These techniquesare not meant to replace such solutions like   ###
+    ### These techniques are not meant to replace such solutions like  ###
     ### F-Response, KAPE, etc.                                         ###
     ######################################################################
 
