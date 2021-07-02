@@ -33,24 +33,23 @@ The core functionality of the tool requires the associated binaries to be in the
 ### Current Development Status ###
   1. Windows PowerShell Script
      - [X] Core Functionality
-     
-     &#9746; Additional Triage Sources   
-     &#9746; Testing
+       - &#9746; Additional Triage Sources   
+       - &#9746; Testing
      - [ ] GUI   
   2. Linux/Unix Python Script
      - [ ] Core Functionality
-     - [ ] Additional Triage Sources   
-     - [ ] Testing
+       - [ ] Additional Triage Sources   
+       - [ ] Testing
      - [ ] GUI   
   3. OSX Script
      - [ ] Core Functionality
-     - [ ] Additional Triage Sources   
-     - [ ] Testing
+       - [ ] Additional Triage Sources   
+       - [ ] Testing
      - [ ] GUI   
   4. Companion Analysis Tool
      - [ ] Core Functionality
-     - [ ] MITRE ATT&CK Integration
-     - [ ] Testing
+       - [ ] MITRE ATT&CK Integration
+       - [ ] Testing
      - [ ] GUI
   5. ELK/Splunk Linkage Tool
      - [ ] Core Functionality
