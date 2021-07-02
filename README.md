@@ -51,9 +51,9 @@ ProTip: _./src/man_ refers to Mandiant Redline Collector.
 ### Current Development Status 
   1. Windows PowerShell Script
      - [X] Core Functionality <br />
-       &#9746; Additional Triage Sources   
-       &#9746; Switches and Parametization
-       &#9746; Testing
+       &#9746; Additional Triage Sources   <br/>
+       &#9746; Switches and Parametization<br/>
+       &#9746; Testing<br/>
      - [ ] GUI   
   2. Linux/Unix Python Script
      - [ ] Core Functionality
