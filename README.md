@@ -30,24 +30,24 @@ DESCRIPTION:
 The core functionality of the tool requires the associated binaries to be in the ./src/ directory. Plan accordingly prior to running. 
 - Test software and script prior to using in a live enviorment
 
-REQUIREMENTS:
-    #    Note: Store Associated Binaries In The Following Folder Structure: /r/n
-    #           => ./BATTLEFIELD_TRIAGE.ps1 /r/n
-    #           ===> ./src/ /r/n
-    #           ===========> ./src/DumpIt/DumpIt.exe /r/n
-    #           ===========> ./src/ftk/ftkimager.exe
-    #                              (and all other associated ftkimager (CLI) Files)
-    #           ===========> ./src/man/helper.bat 
-    #                             (and all other associated Mandiant Redline Collector Files)
-    #           ===========> ./src/RamCapture/x64/RamCapture64.exe
-    #                              (and all other associated RamCatcher Files)
-    #           ===========> ./src/RamCapture/x86/RamCapture86.exe
-    #                              (and all other associated RamCatcher Files)
-    #           ===========> ./src/Surge/surge=collect.exe
-    #                              (and all other associated Surge Collector Pro Files)
-    #           ===========> ./src/winpmem.exe
-    #           ===========> ./src/memoryze/Memoryze.exe    
-    #                              (and all other associated Mandiant Memoryze Files)
+REQUIREMENTS: <br />
+    #    Note: Store Associated Binaries In The Following Folder Structure: <br />
+    #           => ./BATTLEFIELD_TRIAGE.ps1 <br />
+    #           ===> ./src/ <br />
+    #           ===========> ./src/DumpIt/DumpIt.exe <br />
+    #           ===========> ./src/ftk/ftkimager.exe <br />
+    #                              (and all other associated ftkimager (CLI) Files) <br />
+    #           ===========> ./src/man/helper.bat <br />
+    #                             (and all other associated Mandiant Redline Collector Files) <br />
+    #           ===========> ./src/RamCapture/x64/RamCapture64.exe <br />
+    #                              (and all other associated RamCatcher Files) <br />
+    #           ===========> ./src/RamCapture/x86/RamCapture86.exe <br />
+    #                              (and all other associated RamCatcher Files) <br />
+    #           ===========> ./src/Surge/surge=collect.exe <br />
+    #                              (and all other associated Surge Collector Pro Files) <br />
+    #           ===========> ./src/winpmem.exe <br />
+    #           ===========> ./src/memoryze/Memoryze.exe <br />
+    #                              (and all other associated Mandiant Memoryze Files) <br />
     
 ### Current Development Status ###
   1. Windows PowerShell Script
