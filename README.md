@@ -32,7 +32,7 @@ The core functionality of the tool requires the associated binaries to be in the
 
 >REQUIREMENTS:
 >    Note: Store Associated Binaries In The Following Folder Structure:
->    <root> => ./BATTLEFIELD_TRIAGE.ps1
+>           => ./BATTLEFIELD_TRIAGE.ps1
 >           ===> ./src/
 >           ===========> ./src/DumpIt/DumpIt.exe
 >           ===========> ./src/ftk/ftkimager.exe
