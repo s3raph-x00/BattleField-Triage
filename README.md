@@ -33,8 +33,8 @@ The core functionality of the tool requires the associated binaries to be in the
 ### Current Development Status ###
   1. Windows PowerShell Script
      - [X] Core Functionality
-     - [o] Additional Triage Sources   
-     - [o] Testing
+     &#9746; Additional Triage Sources   
+     &#9746; Testing
      - [ ] GUI   
   2. Linux/Unix Python Script
      - [ ] Core Functionality
@@ -60,7 +60,7 @@ The core functionality of the tool requires the associated binaries to be in the
 
 Legend:
 [X] - Completed
-[o] - Partially Completed
+&#9746; - Partially Completed
 [-] - Started
 [ ] - Not Started
 
