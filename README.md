@@ -32,7 +32,7 @@ The core functionality of the tool requires the associated binaries to be in the
 
 ### REQUIREMENTS: <br />
 Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
-<!---
+<blockquote>
 #   > ./BATTLEFIELD_TRIAGE.ps1<br/>
 #      > ./src/<br/>
 #         > ./src/DumpIt/DumpIt.exe<br/>
@@ -49,7 +49,7 @@ Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
 #         >./src/winpmem.exe<br/>
 #         >./src/memoryze/Memoryze.exe<br/>
 #            (andallotherassociatedMandiantMemoryzeFiles)<br/>
---->
+</blockquote>
 
     
 ### Current Development Status 
