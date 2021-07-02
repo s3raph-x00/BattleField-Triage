@@ -98,7 +98,7 @@ ProTip: _./src/man_ refers to Mandiant Redline Collector.
 
 When updating various binaries (winpmem for example), ensure the name matches what is currently in the directory and copy over any associated .dll file. 
 
-  <Special Note Regarding Mandiant (FireEye) Redline Collector>: The _Helper.bat_ file located in _./src/man/_ has been modified to store forensic artifacts in a relational folder   along with the others. Feel free to update (or use different Redline Collection Configurations) but try to match the associated changes as seen below:
+  (Special Note Regarding Mandiant (FireEye) Redline Collector): The _Helper.bat_ file located in _./src/man/_ has been modified to store forensic artifacts in a relational folder   along with the others. Feel free to update (or use different Redline Collection Configurations) but try to match the associated changes as seen below:
   
    ![image](https://user-images.githubusercontent.com/27127072/124299452-6df85500-db2b-11eb-9795-d6edbabf880b.png)
    
@@ -106,6 +106,6 @@ When updating various binaries (winpmem for example), ensure the name matches wh
 winpmem: https://github.com/Velocidex/WinPmem <br />
 memoryze: https://www.fireeye.com/services/freeware/memoryze.html <br />
 ramcapture: https://belkasoft.com/ram-capturer <br />
-Surge Collect Pro <Not Free>: https://www.volexity.com/products-overview/surge/ <br />
+Surge Collect Pro (Not Free): https://www.volexity.com/products-overview/surge/ <br />
 FTK Imager (CLI): https://accessdata.com/product-download/ftk-imager-version-4-5 <br />
 RedLine Collector: https://www.fireeye.com/services/freeware/redline.html <br />
