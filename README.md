@@ -31,23 +31,25 @@ The core functionality of the tool requires the associated binaries to be in the
 - Test software and script prior to using in a live enviorment
 
 ### REQUIREMENTS: <br />
-*Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
-   *> ./BATTLEFIELD_TRIAGE.ps1<br/>
-      *> ./src/<br/>
-         *> ./src/DumpIt/DumpIt.exe<br/>
-         *> ./src/ftk/ftkimager.exe<br/>
-            *(andallotherassociatedftkimager(CLI)Files)<br/>
-         *>./src/man/helper.bat<br/>
-            (andallotherassociatedMandiantRedlineCollectorFiles)<br/>
-         *>./src/RamCapture/x64/RamCapture64.exe<br/>
-            (andallotherassociatedRamCatcherFiles)<br/>
-         *>./src/RamCapture/x86/RamCapture86.exe<br/>
-            (andallotherassociatedRamCatcherFiles)<br/>
-         *>./src/Surge/surgecollect.exe<br/>
-            (andallotherassociatedSurgeCollectorProFiles)<br/>
-         *>./src/winpmem.exe<br/>
-         *>./src/memoryze/Memoryze.exe<br/>
-            (andallotherassociatedMandiantMemoryzeFiles)<br/>
+Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
+<!---
+#   > ./BATTLEFIELD_TRIAGE.ps1<br/>
+#      > ./src/<br/>
+#         > ./src/DumpIt/DumpIt.exe<br/>
+#         > ./src/ftk/ftkimager.exe<br/>
+#            (andallotherassociatedftkimager(CLI)Files)<br/>
+#         >./src/man/helper.bat<br/>
+#            (andallotherassociatedMandiantRedlineCollectorFiles)<br/>
+#         >./src/RamCapture/x64/RamCapture64.exe<br/>
+#            (andallotherassociatedRamCatcherFiles)<br/>
+#         >./src/RamCapture/x86/RamCapture86.exe<br/>
+#            (andallotherassociatedRamCatcherFiles)<br/>
+#         >./src/Surge/surgecollect.exe<br/>
+#            (andallotherassociatedSurgeCollectorProFiles)<br/>
+#         >./src/winpmem.exe<br/>
+#         >./src/memoryze/Memoryze.exe<br/>
+#            (andallotherassociatedMandiantMemoryzeFiles)<br/>
+--->
 
     
 ### Current Development Status 
