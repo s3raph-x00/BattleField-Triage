@@ -98,7 +98,7 @@ ProTip: _./src/man/_ refers to the Mandiant Redline Collector folder.
 
 When updating various binaries (winpmem for example), ensure the name matches what is currently in the directory and copy over any associated files. 
 
-  **Special Note Regarding Mandiant (FireEye) Redline Collector**: The _Helper.bat_ file located in _./src/man/_ has been modified to store forensic artifacts in a relational folder along with the others. Feel free to update (or use different Redline Collection Configurations) but try to match the associated changes in The _Helper.bat_ file as seen below:
+  **Special Note Regarding Mandiant (FireEye) Redline Collector**: The _helper.bat_ file located in _./src/man/_ has been modified to store forensic artifacts in a relational folder along with the others. Feel free to update (or use different Redline Collection Configurations) but try to match the associated changes in The _helper.bat_ file as seen below:
   
    ![image](https://user-images.githubusercontent.com/27127072/124299452-6df85500-db2b-11eb-9795-d6edbabf880b.png)
    
