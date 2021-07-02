@@ -31,7 +31,7 @@ The core functionality of the tool requires the associated binaries to be in the
 - Test software and script prior to using in a live enviorment
 
 ### REQUIREMENTS: <br />
-Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
+Note: Store Binaries (And Their Associated DLLs/Files In The Following Folder Structure:<br/>
 <blockquote>
 #   ./BATTLEFIELD_TRIAGE.ps1<br/>
 #      ./src/<br/>
@@ -45,6 +45,7 @@ Note:StoreAssociatedBinariesInTheFollowingFolderStructure:<br/>
 #         ./src/memoryze/Memoryze.exe<br/>
 </blockquote>
 
+ProTip: _./src/man_ refers to Mandiant Redline Collector.__
     
 ### Current Development Status 
   1. Windows PowerShell Script
