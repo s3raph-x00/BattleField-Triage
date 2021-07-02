@@ -45,7 +45,7 @@ Note: Store Binaries (And Their Associated DLLs/Files In The Following Folder St
 #         ./src/memoryze/Memoryze.exe<br/>
 </blockquote>
 
-ProTip: _./src/man_ refers to Mandiant Redline Collector.__
+ProTip: _./src/man_ refers to Mandiant Redline Collector.
     
 ### Current Development Status 
   1. Windows PowerShell Script
