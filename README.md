@@ -67,7 +67,7 @@ Legend:
 Known Issues:
   1. Windows PowerShell Script
      - [ ] Red Line's Folder Creation For Artifact Is A Few Seconds Off Which Causes It To Create A Seperate Folder.
-     - [ ] GPResult Does Not Dump Into Appropriate XML Format
+     - [ ] GPResult Does Not Dump Into Appropriate XML Format.
      - [ ] Disk Info Does Not Always Appropriately Mark The Drive As External.
   2. Linux/Unix Python Script
   3. OSX Script
