@@ -37,7 +37,6 @@ Note: Store Binaries (And Their Associated DLLs/Files In The Following Folder St
 <blockquote>
 #   ./BATTLEFIELD_TRIAGE.ps1<br/>
 #      ./src/<br/>
-#         ./src/DumpIt/DumpIt.exe<br/>
 #         ./src/ftk/ftkimager.exe<br/>
 #         ./src/man/helper.bat<br/>
 #         ./src/RamCapture/x64/RamCapture64.exe<br/>
@@ -102,3 +101,11 @@ When updating various binaries (winpmem for example), ensure the name matches wh
   <Special Note Regarding Mandiant (FireEye) Redline Collector>: The _Helper.bat_ file located in _./src/man/_ has been modified to store forensic artifacts in a relational folder   along with the others. Feel free to update (or use different Redline Collection Configurations) but try to match the associated changes as seen below:
   
    ![image](https://user-images.githubusercontent.com/27127072/124299452-6df85500-db2b-11eb-9795-d6edbabf880b.png)
+   
+### Where To Get The Core Binaries:
+winpmem: https://github.com/Velocidex/WinPmem
+memoryze: https://www.fireeye.com/services/freeware/memoryze.html
+ramcapture: https://belkasoft.com/ram-capturer
+Surge Collect Pro <Not Free>: https://www.volexity.com/products-overview/surge/
+FTK Imager (CLI): https://accessdata.com/product-download/ftk-imager-version-4-5
+RedLine Collector: https://www.fireeye.com/services/freeware/redline.html
