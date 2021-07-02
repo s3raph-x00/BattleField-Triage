@@ -64,7 +64,6 @@ The core functionality of the tool requires the associated binaries to be in the
 Legend:
 - - [X] - Completed
 -  &#9746; - Partially Completed
--  [-] - Started
 - - [ ] - Not Started
 
 Known Issues:
