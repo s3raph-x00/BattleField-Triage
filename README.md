@@ -3,6 +3,8 @@
 ## BattleField-Triage (BFT) ###
 Forensic Triage Toolset
 
+##### Because it is still in early beta, there will be alot of bugs. Please let me know if you run into any issues and I'll try my best to knock them out. #####
+
 ### Background: 
 
     ######################################################################
