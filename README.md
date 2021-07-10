@@ -88,9 +88,7 @@ ProTip: _./src/man/_ refers to the Mandiant Redline Collector folder.
 
 ##### Known Issues:
   1. Windows PowerShell Script
-     - [ ] Red Line's Folder Creation For Artifact Is A Few Seconds Off Which Causes It To Create A Seperate Folder.
-     - [ ] GPResult Does Not Dump Into Appropriate XML Format.
-     - [ ] Disk Info Does Not Always Appropriately Mark The Drive As External.
+     - [ ] See Open Issues
   2. Linux/Unix Python Script
   3. OSX Script
   4. Companion Analysis Tool
