@@ -8,7 +8,7 @@
 
 <#
     Author Notes: The name and the methodology stems from a need to be
-    able to conduct digital media forensics in austere enviornments. I
+    able to conduct digital media forensics in austere enviornments. I 
     have tried to take various lessons I have learned the hard way and
     standardize the apporach for organizations needing an open source
     solution in areas that lack enterprise solutions. These techniques
@@ -1282,6 +1282,38 @@ function function_Artifact_Storage_TARTARUS
     {
         write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $SavedForensicArtifactsXML
     }
+
+    $SavedForensicArtifactsWMI = $SavedForensicArtifacts + "\WMI\"
+    try
+    {
+        mkdir $SavedForensicArtifactsWMI
+    }
+    catch
+    {
+        write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $SavedForensicArtifactsWMI
+    }
+
+    $SavedForensicArtifactsTasks = $SavedForensicArtifacts + "\Tasks\"
+    try
+    {
+        mkdir $SavedForensicArtifactsTasks
+    }
+    catch
+    {
+        write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $SavedForensicArtifactsTasks
+    }
+
+    $StoredForensicLocationNET = $StoredForensicLocation + "\NET\"
+    try
+    {
+        mkdir $StoredForensicLocationNET
+    }
+    catch
+    {
+        write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $StoredForensicLocationNET
+    }
+
+
     function_Initial_Collect
 }
 
@@ -1293,30 +1325,7 @@ function function_Artifact_Storage_TARTARUS
 
 function function_Initial_Collect
 {
-    write-host -fore Black -back White "-----Gathering Initial Information-----"
-    echo "-----Gathering Initial Information-----" >> $SavedInitialFile
-    echo $string_ISLN_log >> $SavedInitialFile
-    $var_ComputerName = $env:COMPUTERNAME
-    $var_ComputerNameString = "[SYS] The Computer Name is: " + $var_ComputerName
-    echo $var_ComputerNameString >> $SavedInitialFile
-    echo "" >> $SavedInitialFile
-    write-host -fore Black -back White "-----Gathering Network State Information-----"
-    echo "-----Gathering Network State Information-----" >> $SavedInitialFile
-    echo "-----NETSTAT Output-----" >> $SavedInitialFile
-    netstat -natqo >> $SavedInitialFile
-    echo "" >> $SavedInitialFile
-    echo "-----ARP Cache Output-----" >> $SavedInitialFile
-    echo "" >> $SavedInitialFile
-    arp -a >> $SavedInitialFile
-    echo "" >> $SavedInitialFile
-    echo "-----TASKLIST Output-----" >> $SavedInitialFile
-    tasklist /v >> $SavedInitialFile
-    echo "" >> $SavedInitialFile
-    echo "-----TASKLIST/SVC Output-----" >> $SavedInitialFile
-    tasklist /svc >> $SavedInitialFile
-    echo "" >> $SavedInitialFile
-    echo "-----Service Output-----" >> $SavedInitialFile
-    get-service -Verbose | Format-List * >> $SavedInitialFile
+    Function_RIP_Prefetch_and_Network
     function_SystemInfoGathering
 }
 
@@ -1710,6 +1719,58 @@ Function Function_RedLineCollectorPrompt
 
 ################################### QUICK(ish) COMMANDS ##################################
 
+Function Function_RIP_Prefetch_and_Network
+{
+    try
+    {
+        $vartempstring = "[TRIAGE] Starting Initial Host Triage Information Collection."
+        write-host -fore Gray -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+
+        write-host -fore Black -back White "[TRIAGE] Starting Starting Network Trace"
+        echo "[TRIAGE] Starting Starting Network Trace" >> $SavedInitialFile
+        echo $string_ISLN_log >> $SavedInitialFile
+
+        $var_networkETLcapturetrace = $SavedForensicArtifactsETL + $computername + "_Network_Collect.etl"
+        netsh trace start capture=yes tracefile=$var_networkETLcapturetrace persistent=yes maxsize=4096
+
+        write-host -fore Black -back White "-----Gathering Initial Information-----"
+        echo "-----Gathering Initial Information-----" >> $SavedInitialFile
+        echo $string_ISLN_log >> $SavedInitialFile
+        $var_ComputerName = $env:COMPUTERNAME
+        $var_ComputerNameString = "[SYS] The Computer Name is: " + $var_ComputerName
+        echo $var_ComputerNameString >> $SavedInitialFile
+        echo "" >> $SavedInitialFile
+        write-host -fore Black -back White "-----Gathering Network State Information-----"
+        echo "-----Gathering Network State Information-----" >> $SavedInitialFile
+        echo "-----NETSTAT Output-----" >> $SavedInitialFile
+        netstat -natqo >> $SavedInitialFile
+        echo "" >> $SavedInitialFile
+        echo "-----ARP Cache Output-----" >> $SavedInitialFile
+        echo "" >> $SavedInitialFile
+        arp -a >> $SavedInitialFile
+        echo "" >> $SavedInitialFile
+        echo "-----TASKLIST Output-----" >> $SavedInitialFile
+        tasklist /v >> $SavedInitialFile
+        echo "" >> $SavedInitialFile
+        echo "-----TASKLIST/SVC Output-----" >> $SavedInitialFile
+        tasklist /svc >> $SavedInitialFile
+        echo "" >> $SavedInitialFile
+        echo "-----Service Output-----" >> $SavedInitialFile
+        get-service -Verbose | Format-List * >> $SavedInitialFile
+        # HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory
+        # Get-ChildItem C:\Windows\Prefetch 
+    }
+    catch
+    {
+        $vartempstring = "[ERROR] Failed To Pull Initial Host Triage Information."
+        write-host -fore Red -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+        function_failwhale
+        clear
+    }
+}
+
 Function Function_RIP_TRIAGE
 {
     ##### HOST INFO #####
@@ -1718,6 +1779,9 @@ Function Function_RIP_TRIAGE
         $vartempstring = "[TRIAGE] Starting Host Triage Information Collection."
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
+
+        $var_InfoWin32_OptionalFeature_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_OptionalFeature.LocalTime.csv"      
+        Get-WMIObject -Class Win32_OptionalFeature -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_OptionalFeature_csv
 
         $var_InfoLocalTime_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.LocalTime.csv"
         Get-WMIObject -Class Win32_LocalTime -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoLocalTime_csv
@@ -1730,6 +1794,39 @@ Function Function_RIP_TRIAGE
 
         $var_InfoOperatingSystem_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.OperatingSystem.csv"
         Get-WMIObject -Class Win32_OperatingSystem -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoOperatingSystem_csv
+
+        $var_InfoSystemSetting_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemSetting.csv"
+        Get-WMIObject -Class Win32_SystemSetting -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemSetting_csv
+
+        $var_InfoSystemSlot_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemSlot.csv"
+        Get-WMIObject -Class Win32_SystemSlot -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemSlot_csv
+
+        $var_InfoSystemServices_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemServices.csv"
+        Get-WMIObject -Class Win32_SystemServices -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemServices_csv
+
+        $var_InfoSystemResources_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemResources.csv"
+        Get-WMIObject -Class Win32_SystemResources -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemResources_csv
+
+        $var_InfoSystemLoadOrderGroups_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemLoadOrderGroups.csv"
+        Get-WMIObject -Class Win32_SystemLoadOrderGroups -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemLoadOrderGroups_csv
+
+        $var_InfoSystemDevices_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemDevices.csv"
+        Get-WMIObject -Class Win32_SystemDevices -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemDevices_csv
+
+        $var_InfoSystemDesktop_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemDesktop.csv"
+        Get-WMIObject -Class Win32_SystemDesktop -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemDesktop_csv
+
+        $var_InfoSystemConfigurationChangeEvent_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemConfigurationChangeEvent.csv"
+        Get-WMIObject -Class Win32_SystemConfigurationChangeEvent -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemConfigurationChangeEvent_csv
+
+        $var_InfoDCOMApplicationSetting_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.DCOMApplicationSetting.csv"
+        Get-WMIObject -Class Win32_DCOMApplicationSetting -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoDCOMApplicationSetting_csv
+
+        $var_InfoPrinterDriver_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.PrinterDriver.csv"
+        Get-WMIObject -Class Win32_PrinterDriver -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoPrinterDriver_csv
+
+        $var_InfoOSRecoveryConfiguration_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.OSRecoveryConfiguration.csv"
+        Get-WMIObject -Class Win32_OSRecoveryConfiguration -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoOSRecoveryConfiguration_csv
 
         $var_InfoProcessor_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Processor.csv"
         Get-WMIObject -Class Win32_Processor -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoProcessor_csv
@@ -1762,6 +1859,12 @@ Function Function_RIP_TRIAGE
         $vartempstring = "[TRIAGE] Starting Device Triage Information Collection."
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
+
+        $var_InfoBootConfiguration_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.BootConfiguration.csv"
+        Get-WMIObject -Class Win32_BootConfiguration -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoBootConfiguration_csv
+
+        $var_InfoAllocatedResource_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.AllocatedResource.csv"
+        Get-WMIObject -Class Win32_AllocatedResource -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoAllocatedResource_csv
 
         $var_InfoPMCIAController_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.PMCIAController.csv"
         Get-WMIObject -Class Win32_PMCIAController -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoPMCIAController_csv
@@ -1803,6 +1906,9 @@ Function Function_RIP_TRIAGE
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
 
+        $var_InfoWin32_SystemPartitions_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_SystemPartitions.csv"
+        Get-WMIObject -Class Win32_SystemPartitions -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_SystemPartitions_csv
+
         $var_InfoTapeDrive_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.TapeDrive.csv"
         Get-WMIObject -Class Win32_TapeDrive -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoTapeDrive_csv
 
@@ -1835,6 +1941,30 @@ Function Function_RIP_TRIAGE
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
 
+        $var_InfoSystemUsers_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemUsers.csv"
+        Get-WMIObject -Class Win32_SystemUsers -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemUsers_csv
+
+        $var_InfoUserAccount_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.UserAccount.csv"
+        Get-WMIObject -Class Win32_UserAccount -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoUserAccount_csv
+
+        $var_InfoUserDesktop_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.UserDesktop.csv"
+        Get-WMIObject -Class Win32_UserDesktop -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoUserDesktop_csv
+
+        $var_InfoSystemAccount_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemAccount.csv"
+        Get-WMIObject -Class Win32_SystemAccount -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemAccount_csv
+
+        $var_InfoSystemDesktop_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemDesktop.csv"
+        Get-WMIObject -Class Win32_SystemDesktop -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemDesktop_csv
+
+        $var_InfoDesktop_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Desktop.csv"
+        Get-WMIObject -Class Win32_Desktop -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoDesktop_csv
+
+        $var_InfoEnvironment_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Environment.csv"
+        Get-WMIObject -Class Win32_Environment -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoEnvironment_csv
+
+        $var_InfoAccount_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Account.csv"
+        Get-WMIObject -Class Win32_Account -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoAccount_csv
+
         $var_InfoGroup_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Group.csv"
         Get-WMIObject -Class Win32_Group -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoGroup_csv
 
@@ -1843,7 +1973,7 @@ Function Function_RIP_TRIAGE
 
         ##### I know this isn't going to an XML format, working through a bug where GPResult isn't creating the file. ######
         $var_InfoGPResult_xml =  $SavedForensicArtifactsXML + "\" + $computername + "_Host_Info.GPResult.xml"
-        gpresult /Z /R /X >> $var_InfoGPResult_xml 
+        gpresult /Z /R /X $var_InfoGPResult_xml
     }
     catch
     {
@@ -1861,6 +1991,9 @@ Function Function_RIP_TRIAGE
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
 
+        $var_InfoClusterShare_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.ClusterShare.csv"
+        Get-WMIObject -Class Win32_ClusterShare -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoClusterShare_csv
+
         $var_InfoNetworkAdapterConfiguration_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.NetworkAdapterConfiguration.csv"
         Get-WMIObject -Class Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoNetworkAdapterConfiguration_csv
 
@@ -1868,22 +2001,46 @@ Function Function_RIP_TRIAGE
         Get-WMIObject -Class Win32_Share -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoShare_Win_csv
 
         $var_InfoDnsClientServerAddress_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.DnsClientServerAddress.csv"
-        Get-DnsClientServerAddress -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoDnsClientServerAddress_csv
+        Get-DnsClientServerAddress -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoDnsClientServerAddress_csv
 
         $var_InfoNetNeighbor_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.NetNeighbor.csv"
-        Get-NetNeighbor -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoNetNeighbor_csv
+        Get-NetNeighbor -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoNetNeighbor_csv
+
+        $var_InfoSystemNetworkConnections_Win_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemNetworkConnections_Win.csv"
+        Get-WMIObject -Class Win32_SystemNetworkConnections -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemNetworkConnections_Win_csv
+
+        $var_InfoSubSession_Win_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SystemNetworkConnections_Win.csv"
+        Get-WMIObject -Class Win32_SubSession -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSubSession_Win_csv
+
+        $var_InfoShareToDirectory_Win_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.ShareToDirectory_Win.csv"
+        Get-WMIObject -Class Win32_ShareToDirectory -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoShareToDirectory_Win_csv
+
+        $var_InfoSessionResource_Win_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SessionResource_Win.csv"
+        Get-WMIObject -Class Win32_SessionResource -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSessionResource_Win_csv
+
+        $var_InfoSessionProcess_Win_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SessionProcess_Win.csv"
+        Get-WMIObject -Class Win32_SessionProcess -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSessionProcess_Win_csv
+
+        $var_InfoWin32_Session_Win_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Session_Win.csv"
+        Get-WMIObject -Class Win32_Session -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_Session_Win_csv
 
         $var_InfoSMBConnection_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SMBConnection.csv"
-        Get-SMBConnection -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoSMBConnection_csv
+        Get-SMBConnection -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoSMBConnection_csv
 
         $var_InfoSMBShare_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.SMBShare.csv"
-        Get-SMBShare -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoSMBShare_csv
+        Get-SMBShare -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoSMBShare_csv
 
         $var_InfoNetTCPConnection_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.NetTCPConnection.csv"
         Get-NetTCPConnection -Verbose -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoNetTCPConnection_csv
 
         $var_InfoNetshDLL_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.NetshDLL.csv"
-        Get-ItemProperty -ErrorAction SilentlyContinue 'HKLM:\SOFTWARE\Microsoft\Netsh' | export-csv -NoTypeInformation -Append $var_InfoNetshDLL_csv
+        Get-ItemProperty -ErrorAction SilentlyContinue 'HKLM:\SOFTWARE\Microsoft\Netsh' | export-csv -NoTypeInformation -Verbose -Append $var_InfoNetshDLL_csv
+
+        $var_InfoProtocolBinding_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.ProtocolBinding.csv"        
+        Get-WMIObject -Class Win32_ProtocolBinding -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoProtocolBinding_csv
+
+        $var_InfoComSetting_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.ComSetting.csv"
+        Get-WMIObject -Class Win32_ComSetting -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoComSetting_csv
     }
     catch
     {
@@ -1903,16 +2060,41 @@ Function Function_RIP_TRIAGE
         $vartempstring >> $SavedLogFile
 
         $var_InfoPowerShellVersions_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.PowerShellVersions.csv"
-        Get-WindowsOptionalFeature -Online -FeatureName microsoftwindowspowershell* -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoPowerShellVersions_csv
+        Get-WindowsOptionalFeature -Online -FeatureName microsoftwindowspowershell* -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoPowerShellVersions_csv
+
+        $var_InfoWMIElementSetting_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMIElementSetting.csv"
+        Get-WMIObject -Class Win32_WMIElementSetting -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMIElementSetting_csv
 
         $var_InfoWMICFilterToConsumerBinding_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMICFilterToConsumerBinding.csv"
-        Get-WMIObject -Namespace root\Subscription -Class __FilterToConsumerBinding -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoWMICFilterToConsumerBinding_csv
+        Get-WMIObject -Namespace root\Subscription -Class __FilterToConsumerBinding -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICFilterToConsumerBinding_csv
 
         $var_InfoWMICEventConsumer_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMICEventConsumer.csv"
-        Get-WMIObject -Namespace root\Subscription -Class __EventConsumer -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoWMICEventConsumer_csv
+        Get-WMIObject -Namespace root\Subscription -Class __EventConsumer -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICEventConsumer_csv
 
         $var_InfoWMICEventFilter_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMICEventFilter.csv"
-        Get-WMIObject -Namespace root\Subscription -Class __EventFilter -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Append $var_InfoWMICEventFilter_csv
+        Get-WMIObject -Namespace root\Subscription -Class __EventFilter -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICEventFilter_csv
+
+        $var_InfoWMICFilterToConsumerBindingDefault_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMICFilterToConsumerBindingDefault.csv"
+        Get-WMIObject -Namespace root\Default -Class __FilterToConsumerBinding -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICFilterToConsumerBindingDefault_csv
+
+        $var_InfoWMICEventConsumerDefault_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMICEventConsumerDefault.csv"
+        Get-WMIObject -Namespace root\Default -Class __EventConsumer -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICEventConsumerDefault_csv
+
+        $var_InfoWMICEventFilterDefault_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMICEventFilterDefault.csv"
+        Get-WMIObject -Namespace root\Default -Class __EventFilter -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICEventFilterDefault_csv
+
+        $var_InfoWin32_CIMOM_REG_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_CIMOM_REG.csv"
+        Get-ItemProperty "HKLM:\$User\SOFTWARE\Microsoft\Wbem\CIMOM" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_CIMOM_REG_csv
+
+        $var_InfoWMISettingVAR_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.WMIElementSettingVar.csv"
+        Get-WMIObject -Class Win32_WMISetting | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMISettingVAR_csv
+
+        $var_REG_PSEXEC_SVC_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.REG_PSEXEC_SVC.csv"
+        Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\PSEXECSVC" | export-csv -NoTypeInformation -Verbose -Append $var_REG_PSEXEC_SVC_csv
+
+        $var_WMI_DB = $SavedForensicArtifactsWMI + $computername + "\"
+        $windirlocationWMIDB =  $windirlocation + "\System32\wbem\"
+        Copy-Item $windirlocationWMIDB $windirlocationWMIDB -Recurse
     }
     catch
     {
@@ -1923,7 +2105,7 @@ Function Function_RIP_TRIAGE
         clear
     }
 
-    ##### Process Info #####
+    ##### Process/Memory Info #####
     try
     {
         $vartempstring = "[TRIAGE] Starting Process Triage Information Collection."
@@ -1935,25 +2117,35 @@ Function Function_RIP_TRIAGE
 
         $var_InfoWin32_ScheduledJob_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_ScheduledJob.csv"
         Get-WMIObject -Class Win32_ScheduledJob -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_ScheduledJob_csv
+       
+        $var_InfoWin32_PageFileUsage_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_PageFileUsage.csv"
+        Get-WMIObject -Class Win32_PageFileUsage -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_PageFileUsage_csv
+
+        $var_InfoWin32_PageFileSetting_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_PageFileSetting.csv"
+        Get-WMIObject -Class Win32_PageFileSetting -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_PageFileSetting_csv
 
         $var_InfoWin32_Service_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Service.csv"
         Get-WMIObject -Class Win32_Service -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_Service_csv
 
-        $var_InfoWin32_Product = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Service.csv"
+        $var_InfoWin32_Product_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Product.csv"
         Get-WMIObject -Class Win32_Product -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_Product_csv
 
-        $var_InfoWin32_StartupCommand = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Service.csv"
+        $var_InfoWin32_StartupCommand_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_StartupCommand.csv"
         Get-WMIObject -Class Win32_StartupCommand -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_StartupCommand_csv
 
-        $var_InfoWin32_LocalKnownDLL = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_LocalKnownDLL.csv"
-        Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs\' | export-csv -NoTypeInformation -Append $var_InfoWin32_LocalKnownDLL
-        
-        #Get-ChildItem "C:\Windows\Prefetch"
+        $var_InfoWin32_LocalKnownDLL_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_LocalKnownDLL.csv"
+        Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs\' | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_LocalKnownDLL_csv
 
-        ### Credit Goes to newhandle's Meta-Blue.ps1 project ###
-        $var_InfoWin32_DLLSearchOrderHijack = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_DLLSearchOrderHijack.csv"
-        Get-ChildItem -Recurse -path C:\Windows\* -include *.dll | Get-AuthenticodeSignature | Where-Object Status -NE "Valid" | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_DLLSearchOrderHijack_csv
+        <#
+            The following two commands are nice since they rip out all of the performance monitoring statistics and puts them into a single CSV the second command 
+            pulls all of the associated threads for processes. Unfortuantely, they take a minute so they are disabled by default.
+        #>
 
+        # $var_InfoWin32_Perf_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Perf.csv"
+        # Get-WMIObject -Class Win32_Perf -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_Perf_csv
+
+        # $var_InfoWin32_Thread_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Thread.csv"
+        # Get-WMIObject -Class Win32_Thread -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_Thread_csv
     }
     catch
     {
@@ -1964,6 +2156,28 @@ Function Function_RIP_TRIAGE
         clear
     }
 
+    ##### Virtual Machine Info ######
+    try
+    {
+        $vartempstring = "[TRIAGE] Starting To Pull Virtual Machine Information."
+        write-host -fore Gray -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+
+        $var_InfoWin32_VMWare_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_PerfRawData_VMware.csv"
+        Get-WMIObject -Class Win32_PerfRawData_VMware | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_VMWare_csv
+
+        $var_InfoWin32_VMWareVMName_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_VMWareVMName.csv"
+        Get-WMIObject -Class Win32_VMWareVMName | Select-Object -Property Name | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_VMWareVMName_csv
+    }
+    catch
+    {
+        $vartempstring = "[ERROR] Failed To Virtual Machine Info."
+        write-host -fore Red -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+        function_failwhale
+        clear
+    } 
+
     ##### Logs and Stuff ######
     try
     {
@@ -1971,7 +2185,7 @@ Function Function_RIP_TRIAGE
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
 
-        $var_InfoWin32_NTEventLogFile = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_NTEventLogFile.csv"
+        $var_InfoWin32_NTEventLogFile_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_NTEventLogFile.csv"
         Get-WMIObject -Class Win32_NTEventLogFile -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_NTEventLogFile_csv
 
         <#
@@ -1990,6 +2204,7 @@ Function Function_RIP_TRIAGE
         function_failwhale
         clear
     }    
+
     ##### VARIOUS HUNT TECHNIQUES #####
     ### Credit Goes to newhandle's Meta-Blue.ps1 project ###
     try
@@ -1998,17 +2213,17 @@ Function Function_RIP_TRIAGE
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
 
-        #$var_InfoWin32_UACBypassFodHelper = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_UACBypassFodHelper.csv"
-        #Get-ItemProperty "HKU:\$User\SOFTWARE\classes\ms-settings-shell\open\command" | export-csv -NoTypeInformation -Append $var_InfoWin32_UACBypassFodHelper
+        $var_InfoWin32_UACBypassFodHelper_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_UACBypassFodHelper.csv"
+        Get-ItemProperty "HKU:\$User\SOFTWARE\classes\ms-settings-shell\open\command" | export-csv -NoTypeInformation -Append $var_InfoWin32_UACBypassFodHelper_csv
 
-        $var_InfoWin32_NTP_INFO = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_NTP_INFO.csv"
-        Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_NTP_INFO
+        $var_InfoWin32_NTP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_NTP_INFO.csv"
+        Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_NTP_INFO_csv
 
-        $var_InfoWin32_CAP_INFO = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_CAP_INFO.csv"
-        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_CAP_INFO
+        $var_InfoWin32_CAP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_CAP_INFO.csv"
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_CAP_INFO_csv
 
-        $var_InfoWin32_NAMEDPIPES = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_NAMEDPIPES.csv"
-        Get-ChildItem \\.\pipe\ | export-csv -NoTypeInformation -Append $var_InfoWin32_NAMEDPIPES
+        $var_InfoWin32_NAMEDPIPES_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_NAMEDPIPES.csv"
+        Get-ChildItem \\.\pipe\ | export-csv -NoTypeInformation -Append $var_InfoWin32_NAMEDPIPES_csv
     }
     catch
     {
@@ -2028,6 +2243,10 @@ Function Function_RIP_Registry
         $vartempstring = "[TRIAGE] Starting Registry Artifact Collection."
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
+ 
+        $var_InfoWin32_Registry_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Registry.csv"
+        Get-WMIObject -Class Win32_Registry | export-csv -NoTypeInformation -Append $var_InfoWin32_Registry_csv
+ 
         $windirlocationREG =  $windirlocation + "\System32\config\"
         Copy-Item $windirlocationREG $ForensicFileStoreREG -Recurse
     }
@@ -2041,13 +2260,16 @@ Function Function_RIP_Registry
 
 Function Function_RIP_AMCACHE
 {
-    $ForensicFileStoreAMCACHE = $SavedForensicArtifacts + "\AMCACHE\"
     try
     {
         $vartempstring = "[TRIAGE] Starting AMCACHE Artifact Collection."
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
-        $windirlocationamcache =  $windirlocation + "\AppCompat\Programs\Amcache.hve"
+
+        $ForensicFileStoreAMCACHE = $SavedForensicArtifacts + "AMCACHE/"
+        $ForensicFileStoreAMCACHE
+        $windirlocationamcache =  $windirlocation + "\AppCompat\Programs\"
+        $windirlocationamcache
         Copy-Item $windirlocationamcache $ForensicFileStoreAMCACHE -Recurse
     }
     catch
@@ -2064,7 +2286,8 @@ function function_Triage_Meta-Blue_ProcessHash
     $vartempstring = "[TRIAGE] Starting Process Hashing Artifact Collection."
     write-host -fore Gray -back black $vartempstring
     $vartempstring >> $SavedLogFile
-    $var_InfoLocalTime_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.LocalTime.csv"
+
+    $var_InfoProcessHash_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.ProcessHash.csv"
     $var_MB_hashes = @()
     $var_MB_pathsofexe = (gwmi win32_process -ErrorAction SilentlyContinue | select executablepath | ?{$_.executablepath -ne ""})
     $var_MB_execpaths = [System.Collections.ArrayList]@();foreach($i in $var_MB_pathsofexe){$var_MB_execpaths.Add($i.executablepath)| Out-Null}
@@ -2072,7 +2295,7 @@ function function_Triage_Meta-Blue_ProcessHash
     {
         if($i -ne $null)
         {
-            Get-filehash -algorithm SHA256 -path $i -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoLocalTime_csv | out-null
+            Get-filehash -algorithm SHA256 -path $i -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoProcessHash_csv
         }
     }
 }
@@ -2083,11 +2306,12 @@ function function_Triage_Meta-Blue_DriverHash
     $vartempstring = "[TRIAGE] Starting Driver Hashing Artifact Collection."
     write-host -fore Gray -back black $vartempstring
     $vartempstring >> $SavedLogFile
+
     $var_InfoDriverHash_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.DriverHash.csv"
     $var_MB_driverPath = (gwmi win32_systemdriver).pathname          
     foreach($var_MB_driver in $var_MB_driverPath)
     {                
-        Get-filehash -algorithm SHA256 -path $var_MB_driver -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoDriverHash_csv | out-null                
+        Get-filehash -algorithm SHA256 -path $var_MB_driver -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoDriverHash_csv              
     }
 }
 
@@ -2097,25 +2321,40 @@ function function_Triage_Meta-Blue_DLLHash
     $vartempstring = "[TRIAGE] Starting DLL Hashing Artifact Collection."
     write-host -fore Gray -back black $vartempstring
     $vartempstring >> $SavedLogFile
+
     $var_InfoDLLHash_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.DLLHash.csv"
     $var_MB_a = (Get-Process -Module -ErrorAction SilentlyContinue | ?{!($_.FileName -like "*.exe")})
     $var_MB_a = $var_MB_a.FileName.ToUpper() | sort
     foreach($var_MB_file in $var_MB_a)
     {
-        Get-FileHash -Algorithm SHA256 $var_MB_file | export-csv -Append -Verbose -NoTypeInformation $var_InfoDLLHash_csv | Out-Null
+        Get-FileHash -Algorithm SHA256 $var_MB_file | export-csv -Append -Verbose -NoTypeInformation $var_InfoDLLHash_csv
     }
+}
+
+
+function function_Triage_Meta-Blue_DLLSEARCHORDER
+### Credit Goes to newhandle's Meta-Blue.ps1 project ###
+{
+    $vartempstring = "[TRIAGE] Starting DLL Search Order Hijacking Information Collection."
+    write-host -fore Gray -back black $vartempstring
+    $vartempstring >> $SavedLogFile
+
+    $var_InfoWin32_DLLSearchOrderHijack_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_DLLSearchOrderHijack.csv"
+    Get-ChildItem -Recurse -path C:\Windows\* -include *.dll | Get-AuthenticodeSignature | Where-Object Status -NE "Valid" | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_DLLSearchOrderHijack_csv
 }
 
 Function Function_RIP_Schedule_Tasks
 {
-    $ForensicFileStoreScheduledTasks = $SavedForensicArtifacts + "\Tasks\"
-    $ForensicFileStoreScheduledTasksFile = $ForensicFileStoreScheduledTasks + "scheduledtasks.txt"
+
     try
     {
         $vartempstring = "[TRIAGE] Starting Scheduled Task Collection."
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
-        Get-ScheduledTask -Verbose | Format-List >> $ForensicFileStoreScheduledTasksFile
+        
+        $ForensicFileStoreScheduledTasks = $SavedForensicArtifacts + "Tasks/"
+        $ForensicFileStoreScheduledTasksFile = $ForensicFileStoreScheduledTasks + $computername + "scheduledtasks_rip.csv"
+        Get-ScheduledTask -Verbose | Format-List | export-csv -NoTypeInformation -Verbose -Append $ForensicFileStoreScheduledTasksFile
     }
     catch
     {
@@ -2133,8 +2372,45 @@ Function Function_RIP_Event_Logs
         $vartempstring = "[TRIAGE] Starting Event Log Collection."
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
-        $windirlocationevt =  $windirlocation + "\System32\winevt\Logs\"
-        Copy-Item $windirlocationevt $ForensicFileStoreEVT -Recurse
+
+        $windowsversioncheck = (Get-CimInstance CIM_OperatingSystem | select -ExpandProperty version).Split(".")[0]
+        if ($windowsversioncheck -gt 7)
+        {
+            try
+            {
+                $windirlocationevt =  $windirlocation + "\System32\winevt\Logs\"
+                Copy-Item $windirlocationevt $ForensicFileStoreEVT -Recurse
+            }
+            catch
+            {
+                write-host -fore Red -back black "[ERROR] Failed to Copy Event Log Files."
+                function_failwhale
+                clear
+            }
+        }
+        if ($windowsversioncheck -lt 7)
+        {
+            try
+            {
+                $windirlocationevt =  $windirlocation + "\System32\config\"
+                Copy-Item $windirlocationevt $ForensicFileStoreEVT -Recurse
+            }
+            catch
+            {
+                write-host -fore Red -back black "[ERROR] Failed to Copy Event Log Files."
+                function_failwhale
+                clear
+            }
+        }
+
+        $var_InfoWin32_Reg_EVTApplication_Settings = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_EVTApplication_Settings.csv"
+        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Application" | export-csv -NoTypeInformation -Append $var_InfoWin32_Reg_EVTApplication_Settings
+
+        $var_InfoWin32_Reg_EVTSystem_Settings = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_EVTSystem_Settings.csv"
+        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\System" | export-csv -NoTypeInformation -Append $var_InfoWin32_Reg_EVTSystem_Settings
+        
+        $var_InfoWin32_Reg_EVTSecurity_Settings = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_EVTSecurity_Settings.csv"
+        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Security" | export-csv -NoTypeInformation -Append $var_InfoWin32_Reg_EVTSecurity_Settings
     }
     catch
     {
@@ -2159,6 +2435,7 @@ Function Function_RIP_RDP_BITMAP
                 try
                 {
                     $windirlocationRDPBIT =  $CurrentUsernameRDP + "\Local Settings\Application Data\Microsoft\Terminal Server Client\Cache\"
+                    Copy-Item $windirlocationRDPBIT $ForensicFileStoreRDPBIT -Recurse
                 }
                 catch
                 {
@@ -2215,13 +2492,116 @@ Function Function_RIP_RDP_BITMAP
     }        
 }
 
-##not done need to format output
+##not done
+Function Function_RIP_COMMON_AUTORUNS
+{
+    try
+    {
+        $vartempstring = "[TRIAGE] Starting Collection of Info For Common."
+        write-host -fore Gray -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+
+        $var_InfoWin32_Reg_System_ExRunOnce = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_System_ExRunOnce.csv"
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_System_ExRunOnce
+
+        $var_InfoWin32_Reg_System_ExRun = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_System_ExRun.csv"
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\Explorer\Run" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_System_ExRun
+
+        $var_InfoWin32_Reg_System_CuRun = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_System_CuRun.csv"
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_System_CuRun
+
+        $var_InfoWin32_Reg_System_UserInit = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_System_UserInit.csv"
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Userinit" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_System_UserInit
+
+        $var_InfoWin32_Reg_CurUser_ExRunOnce = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_CurUser_ExRunOnce.csv"
+        Get-ItemProperty "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_CurUser_ExRunOnce
+
+        $var_InfoWin32_Reg_CurUser_ExRun = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_CurUser_ExRun.csv"
+        Get-ItemProperty "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\Explorer\Run" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_CurUser_ExRun
+        
+        # %APPDATA%\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+    }
+    catch
+    {
+        $vartempstring = "[ERROR] Failed To Pull Information For Various HUNT Techniques."
+        write-host -fore Red -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+        function_failwhale
+        clear
+    } 
+}
+
 Function Function_RIP_SHIMCACHE
 {
-    $var_RIP_SHIMCACHE_MAIN = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\"
-    $var_RIP_SHIMCACHE_ACC = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty AppCompatCache
-    $var_RIP_SHIMCACHE_CMB = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty CacheMainSDB
-    $var_RIP_SHIMCACHE_ST = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty SdbTime
+    $windowsversioncheck = (Get-CimInstance CIM_OperatingSystem | select -ExpandProperty version).Split(".")[0]
+    [int]$windowsversionchecknum = [convert]::ToINt32($windowsversioncheck)
+    $windowsversioncheck
+    if ($windowsversionchecknum -gt 7)
+    {
+        try
+        {
+            $vartempstring = "[TRIAGE] Starting Collection of Info For SHIMCache Artifacts (Windows 7+)."
+            write-host -fore Gray -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+
+            $var_InfoWin32_Reg_ShimCache_Main = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_Main.csv"
+            $var_RIP_SHIMCACHE_MAIN = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_Main
+
+            $var_InfoWin32_Reg_ShimCache_ACC = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_ACC.csv"
+            $var_RIP_SHIMCACHE_ACC = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty AppCompatCache | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_ACC
+
+            $var_InfoWin32_Reg_ShimCache_CMB = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_CMB.csv"
+            $var_RIP_SHIMCACHE_CMB = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty CacheMainSDB | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_CMB
+
+            $var_InfoWin32_Reg_ShimCache_ST = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_ST.csv"
+            $var_RIP_SHIMCACHE_ST = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty SdbTime | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_ST
+        }
+        catch
+        {
+            $vartempstring = "[ERROR] Failed To Pull SHIMCache Artifacts."
+            write-host -fore Red -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+            function_failwhale
+            clear
+        }
+    }
+    if ($windowsversionchecknum -lt 7)
+    {
+        try
+        {
+            $vartempstring = "[TRIAGE] Starting Collection of Info For SHIMCache Artifacts (Windows XP-)."
+            write-host -fore Gray -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+
+            $var_InfoWin32_Reg_ShimCache_Main = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_Main.csv"
+            $var_RIP_SHIMCACHE_MAIN = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility\" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_Main
+
+            $var_InfoWin32_Reg_ShimCache_ACC = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_ACC.csv"
+            $var_RIP_SHIMCACHE_ACC = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility\" | Select-Object AppCompatCache -ExpandProperty AppCompatCache | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_ACC
+
+            $var_InfoWin32_Reg_ShimCache_CMB = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_CMB.csv"
+            $var_RIP_SHIMCACHE_CMB = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility\" | Select-Object AppCompatCache -ExpandProperty CacheMainSDB | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_CMB
+
+            $var_InfoWin32_Reg_ShimCache_ST = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_Reg_ShimCache_ST.csv"
+            $var_RIP_SHIMCACHE_ST = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility\" | Select-Object AppCompatCache -ExpandProperty SdbTime | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_ST
+        }
+        catch
+        {
+            $vartempstring = "[ERROR] Failed To Pull SHIMCache Artifacts."
+            write-host -fore Red -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+            function_failwhale
+            clear
+        }
+    }
+    else
+    {
+        $vartempstring = "[ERROR] Failed To Pull SHIMCache Artifacts."
+        write-host -fore Red -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+        function_failwhale
+    clear
+    }
 }
 
 ##################################### SLOW(ish) COMMANDS ##################################
@@ -2249,44 +2629,58 @@ Function Function_RIP_Alt_Data_Streams
     ##cmd.exe /c start dir /s /r %SYSTEMROOT%\ | find ":DATA" ## Does not Pipe Within Powershell Properly
 }
 
-##not tested and not finished
 Function Function_RIP_VSS_INFO
 #Pulled from https://stackoverflow.com/questions/40796634/how-to-enumerate-shadow-copies-of-a-given-file-or-folder
 {
-    $shadowStorageList = @();
-    $volumeList = Get-WmiObject Win32_Volume -Property SystemName,DriveLetter,DeviceID,Capacity,FreeSpace -Filter "DriveType=3" | select @{n="DriveLetter";e={$_.DriveLetter.ToUpper()}},DeviceID,@{n="CapacityGB";e={([math]::Round([int64]($_.Capacity)/1GB,2))}},@{n="FreeSpaceGB";e={([math]::Round([int64]($_.FreeSpace)/1GB,2))}} | Sort DriveLetter;
-    $shadowStorages = gwmi Win32_ShadowStorage -Property AllocatedSpace,DiffVolume,MaxSpace,UsedSpace,Volume |
-                Select @{n="Volume";e={$_.Volume.Replace("\\","\").Replace("Win32_Volume.DeviceID=","").Replace("`"","")}},
-                @{n="DiffVolume";e={$_.DiffVolume.Replace("\\","\").Replace("Win32_Volume.DeviceID=","").Replace("`"","")}},
-                @{n="AllocatedSpaceGB";e={([math]::Round([int64]($_.AllocatedSpace)/1GB,2))}},
-                @{n="MaxSpaceGB";e={([math]::Round([int64]($_.MaxSpace)/1GB,2))}},
-                @{n="UsedSpaceGB";e={([math]::Round([int64]($_.UsedSpace)/1GB,2))}}
-
-    # Create an array of Customer PSobject
-    foreach($shStorage in $shadowStorages) 
+    try
     {
-        $tmpDriveLetter = "";
-        foreach($volume in $volumeList) {
-            if($shStorage.DiffVolume -eq $volume.DeviceID) 
-            {
-                $tmpDriveLetter = $volume.DriveLetter;
+        $vartempstring = "[TRIAGE] Starting Collection of Info For Volume Shadow Copies."
+        write-host -fore Gray -back black $vartempstring
+        $vartempstring >> $SavedLogFile
+
+        $var_InfoWin32_VSS_Copies = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_VSS_Copies.csv"
+
+        $shadowStorageList = @();
+        $volumeList = Get-WmiObject Win32_Volume -Property SystemName,DriveLetter,DeviceID,Capacity,FreeSpace -Filter "DriveType=3" | select @{n="DriveLetter";e={$_.DriveLetter.ToUpper()}},DeviceID,@{n="CapacityGB";e={([math]::Round([int64]($_.Capacity)/1GB,2))}},@{n="FreeSpaceGB";e={([math]::Round([int64]($_.FreeSpace)/1GB,2))}} | Sort DriveLetter;
+        $shadowStorages = gwmi Win32_ShadowStorage -Property AllocatedSpace,DiffVolume,MaxSpace,UsedSpace,Volume |
+                    Select @{n="Volume";e={$_.Volume.Replace("\\","\").Replace("Win32_Volume.DeviceID=","").Replace("`"","")}},
+                    @{n="DiffVolume";e={$_.DiffVolume.Replace("\\","\").Replace("Win32_Volume.DeviceID=","").Replace("`"","")}},
+                    @{n="AllocatedSpaceGB";e={([math]::Round([int64]($_.AllocatedSpace)/1GB,2))}},
+                    @{n="MaxSpaceGB";e={([math]::Round([int64]($_.MaxSpace)/1GB,2))}},
+                    @{n="UsedSpaceGB";e={([math]::Round([int64]($_.UsedSpace)/1GB,2))}}
+
+        # Create an array of Customer PSobject
+        foreach($shStorage in $shadowStorages) 
+        {
+            $tmpDriveLetter = "";
+            foreach($volume in $volumeList) {
+                if($shStorage.DiffVolume -eq $volume.DeviceID) 
+                {
+                    $tmpDriveLetter = $volume.DriveLetter;
+                }
             }
+            $objVolume = New-Object PSObject -Property @{
+                Volume = $shStorage.Volume
+                AllocatedSpaceGB = $shStorage.AllocatedSpaceGB
+                UsedSpaceGB = $shStorage.UsedSpaceGB
+                MaxSpaceGB = $shStorage.MaxSpaceGB
+                DriveLetter = $tmpDriveLetter
+            }
+            $shadowStorageList += $objVolume;
         }
-        $objVolume = New-Object PSObject -Property @{
-            Volume = $shStorage.Volume
-            AllocatedSpaceGB = $shStorage.AllocatedSpaceGB
-            UsedSpaceGB = $shStorage.UsedSpaceGB
-            MaxSpaceGB = $shStorage.MaxSpaceGB
-            DriveLetter = $tmpDriveLetter
-        }
-        $shadowStorageList += $objVolume;
-    }
 
-    for($i = 0; $i -lt $shadowStorageList.Count; $i++)
+        for($i = 0; $i -lt $shadowStorageList.Count; $i++)
+        {
+            $objCopyList = Get-WmiObject Win32_ShadowCopy  | Where-Object {$_.VolumeName -eq $shadowStorageList[$i].Volume} | select DeviceObject, InstallDate
+            $shadowStorageList[$i] | add-member Noteproperty shadowcopies $objCopyList
+            $shadowStorageList[$i] | export-csv -NoTypeInformation -Append $var_InfoWin32_VSS_Copies
+        }
+    }
+    catch
     {
-        $objCopyList = Get-WmiObject Win32_ShadowCopy  | Where-Object {$_.VolumeName -eq $shadowStorageList[$i].Volume} | select DeviceObject, InstallDate
-        $shadowStorageList[$i] | add-member Noteproperty shadowcopies $objCopyList
-        $shadowStorageList[$i]
+        write-host -fore Red -back black "[ERROR] Failed to Query Volume Shadow Copies."
+        function_failwhale
+        clear
     }
 }
 
@@ -2347,9 +2741,10 @@ Function Function_RIP_TRIAGE_SELECTOR
         Function_RIP_RDP_BITMAP
         Function_RIP_AMCACHE
         Function_RIP_SHIMCACHE
+        function_Triage_Meta-Blue_DLLSEARCHORDER
         Function_Triage_Meta-Blue_ProcessHash
-        Function_Triage_Meta-Blue_DriverHash
-        Function_Triage_Meta-Blue_DLLHash
+        #Function_Triage_Meta-Blue_DriverHash
+        #Function_Triage_Meta-Blue_DLLHash
         Function_Get-DiskInfoMain
     }
     if ($var_CollectionPlanPrompt_Triage -eq "3")
@@ -2361,11 +2756,12 @@ Function Function_RIP_TRIAGE_SELECTOR
         Function_RIP_RDP_BITMAP
         Function_RIP_AMCACHE
         Function_RIP_SHIMCACHE
+        function_Triage_Meta-Blue_DLLSEARCHORDER
         Function_Triage_Meta-Blue_ProcessHash
-        Function_Triage_Meta-Blue_DriverHash
-        Function_Triage_Meta-Blue_DLLHash
+        #Function_Triage_Meta-Blue_DriverHash
+        #Function_Triage_Meta-Blue_DLLHash
         Function_RIP_Alt_Data_Streams
-        #Function_RIP_VSS_INFO
+        Function_RIP_VSS_INFO
         Function_Hash_All_Files_OS_DRIVE
         Function_Get-DiskInfoMain
     }
@@ -2408,7 +2804,7 @@ Function Function_RIP_TRIAGE_MAIN
         {
         write-host -fore Red -back black "[ERROR] Your Response Was Not YES or NO."
         function_failwhale
-        clear
+        #clear
         Function_RIP_TRIAGE_MAIN
         }
     }    
@@ -2503,7 +2899,7 @@ Function Function_Get-DiskSMARTInfo
     }
     finally
     {
-        function_fin
+        function_EndClearCleanUp
     }
 }
 
@@ -2604,7 +3000,6 @@ Function Function_CollectionPlanPrompt
     if ($var_CollectionPlanPrompt -eq "YES")
     {
         $var_DriveNumber >> $SavedVarFTKFile
-        $var_DriveNumber
         $var_CollectionSizePlanadd >> $SavedVarFile
         write-host -fore Gray -back black "-----------------------------------------------------"
     }
@@ -2700,6 +3095,20 @@ Function Function_Get-DiskInfoMain
 ######################################################################
 ############################### LA MER ###############################
 ######################################################################
+
+function function_EndClearCleanUp
+{
+    write-host -fore Gray -back black "[FIN] Staring Cleanup And Ending Processes"
+    echo "[FIN] Staring Cleanup And Ending Processes" >> $SavedLogFile
+
+    write-host -fore Gray -back black "[FIN] Ending Network Tracing"
+    echo "[FIN] Ending Network Tracing" >> $SavedLogFile
+        
+    netsh trace stop
+    echo "----------- FIN ----------" >> $SavedLogFile
+    function_fin
+    pause
+}
 
 ErrorActionPreference = 'Inquire'
 Function_Agreement
