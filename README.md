@@ -35,7 +35,7 @@ The core functionality of the tool requires the associated binaries to be in the
 - Test software and script prior to using in a live enviorment
 
 ### REQUIREMENTS: <br />
-Note: Store Binaries (And Their Associated DLLs/Files In The Following Folder Structure:<br/>
+Note: Store Binaries (And Their Associated DLLs/Files) In The Following Folder Structure:<br/>
 <blockquote>
 #   ./BATTLEFIELD_TRIAGE.ps1<br/>
 #      ./src/<br/>
