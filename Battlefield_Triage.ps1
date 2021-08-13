@@ -26,7 +26,7 @@
 ######################################################################
 ### AUTHOR:      s3raph                                            ###
 ### DATE:        07/01/2021                                        ###
-### VERSION:     v.43 (Beta)                                       ###
+### VERSION:     v.42 (Beta)                                       ###
 ### SYNOPSIS:    Battle Field Triage Script Meant To Standardize   ###
 ###              collection and initial analysis.                  ###
 ######################################################################
@@ -51,7 +51,72 @@
 ### GITHUB:     https://github.com/s3raph-x00/BattleField-Triage/  ###
 ######################################################################
 
+.EXAMPLE
+###########################################################################
+# ./Battlefield_Triage.ps1 -env_verbose v -env_triage 3  -env_location ./ #
+# [The Script]             [Verbose]      [Quick Triage] [Saves to ./]    #
+###########################################################################
+
+.EXAMPLE
+###########################################################################
+# ./Battlefield_Triage.ps1 -env_verbose q -env_triage 0  -env_location D:\#
+# [The Script]             [Quiet]        [Full Triage]  [Saves to D:\]   #
+###########################################################################
+
 #>
+
+param ($env_verbose, $env_triage, $env_location)
+# env_verbose
+    <# 
+        Variables:   [v] = verbose 
+                     [vv] = very verbose 
+                     [q] = quiet
+                     [ne] = quiet and no errors.
+                     [null] = quiet
+
+                     Default: [q] or quiet.
+
+        Example:     ./Battlefield_Triage.ps1 -env_verbosity v
+
+        Description: Specifies the verbosity of the script. 
+    #>
+
+# env_triage
+    <# 
+        Variables:   [0] = Pull All Possible Artifacts
+                     [1] = Comprehensive (See Github)
+                     [2] = Triage+ (Basics and More)
+                     [3] = Triage (Basic Triage Pull)
+                     [M] = Manual
+                     [null] = Manual
+
+                     Default is: [null] or Manual
+
+        Example:     ./Battlefield_Triage.ps1 -env_speed 0
+
+        Description: Associates Functions With Argument Values.
+
+                     Prefetch: [3], [2], [1], [0]
+                     Atmospherics: [3], [2], [1], [0]
+                     Background Network Capture: [3], [2], [1], [0]
+                     Full Memory Capture: [2], [1], [0]
+                     Redline Collection: [3], [2], [1], [0]
+                     Triage-Rip-Lite (WMI, Reg Queries, etc): [3], [2], [1], [0]
+                     Triage-Rip-Normal (Lite + VSS, SHIMCACHE, AMCACHE, RDP_Bitmap): [2], [1], [0]
+                     Triage-Rip-Full (Normal + ADS Detection, File Hash, and Hunting Techniques): [1], [0]
+    #>
+
+# env_location
+    <# 
+        Variables;   [File location in relative or full file path]
+                     
+                     Default is: [./] or where the script was run from.
+                     
+        Example:     ./Battlefield_Triage.ps1 -env_location ./
+        Example:     ./Battlefield_Triage.ps1 -env_location D:\forensics
+
+        Description: Specifies the location where the logs, forensic artifacts, and associated files will be saved. 
+    #>
 
 ######################################################################
 ############################# VARIABLES ##############################
@@ -60,7 +125,7 @@
 <# 
     The Error Action Preference Is Set This Way Inititaly As There Are
     Known Errors. This Cleans up the CLI Until The End Of The Initial 
-    Variable Configuration.
+    Configuration.
 #> 
 
 $ErrorActionPreference = 'silentlycontinue' 
@@ -231,11 +296,14 @@ break
 
 function function_failwhale
 {
-    write-host -fore Red -back black "▄██████████████▄▐█▄▄▄▄█▌"
-    write-host -fore Red -back black "██████▌▄▌▄▐▐▌███▌▀▀██▀▀"
-    write-host -fore Red -back black "████▄█▌▄▌▄▐▐▌▀███▄▄█▌"
-    write-host -fore Red -back black "▄▄▄▄▄██████████████"
-    pause
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Red -back black "▄██████████████▄▐█▄▄▄▄█▌"
+        write-host -fore Red -back black "██████▌▄▌▄▐▐▌███▌▀▀██▀▀"
+        write-host -fore Red -back black "████▄█▌▄▌▄▐▐▌▀███▄▄█▌"
+        write-host -fore Red -back black "▄▄▄▄▄██████████████"
+        pause
+    }
 }
 
 ######################################################################
@@ -1314,6 +1382,15 @@ function function_Artifact_Storage_TARTARUS
         write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $StoredForensicLocationNET
     }
 
+    $StoredForensicLocationWBEM = $StoredForensicLocation + "\WBEM\"
+    try
+    {
+        mkdir $StoredForensicLocationWBEM
+    }
+    catch
+    {
+        write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $StoredForensicLocationNET
+    }
 
     function_Initial_Collect
 }
@@ -1835,7 +1912,6 @@ Function Function_RIP_TRIAGE
         $var_InfoSystemEnclosure_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_SystemEnclosure.csv"
         Get-WMIObject -Class Win32_SystemEnclosure -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoSystemEnclosure_csv
 
-        ### Pulls Windows Hot-Fix Info ###
         $var_InfoQuickFixEngineering_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_WindowsHostFixList.csv"
         Get-WMIObject -Class Win32_QuickFixEngineering -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoQuickFixEngineering_csv
 
@@ -2083,18 +2159,37 @@ Function Function_RIP_TRIAGE
         $var_InfoWMICEventFilterDefault_csv = $SavedForensicArtifactsCSV + $computername + "_WMIC-PS_Info.WMIC_EventFilterDefault.csv"
         Get-WMIObject -Namespace root\Default -Class __EventFilter -ErrorAction SilentlyContinue | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMICEventFilterDefault_csv
 
-        $var_InfoWin32_CIMOM_REG_csv = $SavedForensicArtifactsCSV + $computername + "_WMIC-PS_Info.Win32_CIMOM_REG.csv"
-        Get-ItemProperty "HKLM:\$User\SOFTWARE\Microsoft\Wbem\CIMOM" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_CIMOM_REG_csv
-
         $var_InfoWMISettingVAR_csv = $SavedForensicArtifactsCSV + $computername + "_WMIC-PS_Info.WMIC_ElementSettingVar.csv"
         Get-WMIObject -Class Win32_WMISetting | export-csv -NoTypeInformation -Verbose -Append $var_InfoWMISettingVAR_csv
 
-        $var_REG_PSEXEC_SVC_csv = $SavedForensicArtifactsCSV + $computername + "_WMIC-PS_Info.PSEXEC_SVC.csv"
-        Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\PSEXECSVC" | export-csv -NoTypeInformation -Verbose -Append $var_REG_PSEXEC_SVC_csv
+        $var_test_path_cimom = test-path -Path "HKLM:\$User\SOFTWARE\Microsoft\Wbem\CIMOM"
+        if ($var_test_path_psexec -eq "True")
+        {
+            $var_InfoWin32_CIMOM_REG_csv = $SavedForensicArtifactsCSV + $computername + "_WMIC-PS_Info.Win32_CIMOM_REG.csv"
+            Get-ItemProperty "HKLM:\$User\SOFTWARE\Microsoft\Wbem\CIMOM" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_CIMOM_REG_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] Registry Key: HKLM:\$User\SOFTWARE\Microsoft\Wbem\CIMOM Does Not Exist."
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
 
-        $var_WMI_DB = $SavedForensicArtifactsWMI + $computername + "\"
+        $var_test_path_psexec = test-path -Path "HKLM:\System\CurrentControlSet\Services\PSEXECSVC"
+        if ($var_test_path_psexec -eq "True")
+        {
+            $var_REG_PSEXEC_SVC_csv = $SavedForensicArtifactsCSV + $computername + "_WMIC-PS_Info.PSEXEC_SVC.csv"
+            Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\PSEXECSVC" | export-csv -NoTypeInformation -Verbose -Append $var_REG_PSEXEC_SVC_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] Registry Key: HKLM:\System\CurrentControlSet\Services\PSEXECSVC Does Not Exist."
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
+
         $windirlocationWMIDB =  $windirlocation + "\System32\wbem\"
-        Copy-Item $windirlocationWMIDB $windirlocationWMIDB -Recurse
+        Copy-Item $windirlocationWMIDB $StoredForensicLocationWBEM -Recurse
     }
     catch
     {
@@ -2133,8 +2228,19 @@ Function Function_RIP_TRIAGE
         $var_InfoWin32_StartupCommand_csv = $SavedForensicArtifactsCSV + $computername + "_Memory_Info.Win32_StartupCommand.csv"
         Get-WMIObject -Class Win32_StartupCommand -ErrorAction SilentlyContinue | export-csv -Append -Verbose -NoTypeInformation $var_InfoWin32_StartupCommand_csv
 
-        $var_InfoWin32_LocalKnownDLL_csv = $SavedForensicArtifactsCSV + $computername + "_Memory_Info.Win32_LocalKnownDLL.csv"
-        Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs\' | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_LocalKnownDLL_csv
+        $var_test_path_knowndll = test-path -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs\"
+        if ($var_test_path_knowndll -eq "True")
+        {
+            $var_InfoWin32_LocalKnownDLL_csv = $SavedForensicArtifactsCSV + $computername + "_Memory_Info.Win32_LocalKnownDLL.csv"
+            Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs\' | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_LocalKnownDLL_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] Registry Key: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs\ Does Not Exist."
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
+
 
         <#
             The following two commands are nice since they rip out all of the performance monitoring statistics and puts them into a single CSV the second command 
@@ -2213,17 +2319,59 @@ Function Function_RIP_TRIAGE
         write-host -fore Gray -back black $vartempstring
         $vartempstring >> $SavedLogFile
 
-        $var_InfoWin32_UACBypassFodHelper_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_UACBypassFodHelper.csv"
-        Get-ItemProperty "HKU:\$User\SOFTWARE\classes\ms-settings-shell\open\command" | export-csv -NoTypeInformation -Append $var_InfoWin32_UACBypassFodHelper_csv
 
-        $var_InfoWin32_NTP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_NTP_INFO.csv"
-        Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_NTP_INFO_csv
+        $var_test_path_shell = test-path -Path "HKCU:\SOFTWARE\classes\ms-settings-shell\open\command"
+        if ($var_test_path_shell -eq "True")
+        {
+            $var_InfoWin32_UACBypassFodHelper_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_UACBypassFodHelper.csv"
+            Get-ItemProperty "HKCU:\SOFTWARE\classes\ms-settings-shell\open\command" | export-csv -NoTypeInformation -Append $var_InfoWin32_UACBypassFodHelper_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] Registry Key: HKCU:\SOFTWARE\classes\ms-settings-shell\open\command Does Not Exist."
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
 
-        $var_InfoWin32_CAP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_CAP_INFO.csv"
-        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_CAP_INFO_csv
+        $var_test_path_time = test-path -Path "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*"
+        if ($var_test_path_time -eq "True")
+        {
+            $var_InfoWin32_NTP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_NTP_INFO.csv"
+            Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_NTP_INFO_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] Registry Key: HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\* Does Not Exist."
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
 
-        $var_InfoWin32_NAMEDPIPES_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_NAMEDPIPES.csv"
-        Get-ChildItem \\.\pipe\ | export-csv -NoTypeInformation -Append $var_InfoWin32_NAMEDPIPES_csv
+        $var_test_path_consent = test-path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*"
+        if ($var_test_path_consent -eq "True")
+        {
+            $var_InfoWin32_CAP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_CAP_INFO.csv"
+            Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_CAP_INFO_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] Registry Key: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\* Does Not Exist."
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
+
+        $var_test_path_pipe = test-path -Path \\.\pipe\
+        if ($var_test_path_pipe -eq "True")
+        {
+            $var_InfoWin32_NAMEDPIPES_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_NAMEDPIPES.csv"
+            Get-ChildItem \\.\pipe\ | export-csv -NoTypeInformation -Append $var_InfoWin32_NAMEDPIPES_csv
+        }
+        else
+        {
+            $vartempstring = "[WARN] \\.\pipe\ Does Not Exist"
+            write-host -fore Yellow -back black $vartempstring
+            $vartempstring >> $SavedLogFile
+        }
+
     }
     catch
     {
@@ -2241,7 +2389,10 @@ Function Function_RIP_Registry
     try
     {
         $vartempstring = "[TRIAGE] Starting Registry Artifact Collection."
-        write-host -fore Gray -back black $vartempstring
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black $vartempstring
+        }
         $vartempstring >> $SavedLogFile
  
         $var_InfoWin32_Registry_csv = $SavedForensicArtifactsCSV + $computername + "_Registry_Info.Win32_Registry.csv"
@@ -2252,7 +2403,11 @@ Function Function_RIP_Registry
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Failed to Copy Registry."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Failed to Copy Registry."
+        }
+        echo "[ERROR] Failed to Copy Registry." >> $SavedLogFile
         function_failwhale
         clear
     }
@@ -2263,7 +2418,10 @@ Function Function_RIP_AMCACHE
     try
     {
         $vartempstring = "[TRIAGE] Starting AMCACHE Artifact Collection."
-        write-host -fore Gray -back black $vartempstring
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black $vartempstring
+        }
         $vartempstring >> $SavedLogFile
 
         $ForensicFileStoreAMCACHE = $SavedForensicArtifacts + "AMCACHE/"
@@ -2274,7 +2432,11 @@ Function Function_RIP_AMCACHE
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Failed to Copy AMCACHE."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Failed to Copy AMCACHE."
+        }
+        echo "[ERROR] Failed to Copy AMCACHE." >> $SavedLogFile
         function_failwhale
         clear
     }
@@ -2284,7 +2446,10 @@ function function_Triage_Meta-Blue_ProcessHash
 ### Credit Goes to newhandle's Meta-Blue.ps1 project ###
 {
     $vartempstring = "[TRIAGE] Starting Process Hashing Artifact Collection."
-    write-host -fore Gray -back black $vartempstring
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black $vartempstring
+    }
     $vartempstring >> $SavedLogFile
 
     $var_InfoProcessHash_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_ProcessHash.csv"
@@ -2304,7 +2469,10 @@ function function_Triage_Meta-Blue_DriverHash
 ### Credit Goes to newhandle's Meta-Blue.ps1 project ###
 {
     $vartempstring = "[TRIAGE] Starting Driver Hashing Artifact Collection."
-    write-host -fore Gray -back black $vartempstring
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black $vartempstring
+    }
     $vartempstring >> $SavedLogFile
 
     $var_InfoDriverHash_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_DriverHash.csv"
@@ -2319,7 +2487,10 @@ function function_Triage_Meta-Blue_DLLHash
 ### Credit Goes to newhandle's Meta-Blue.ps1 project ###
 {
     $vartempstring = "[TRIAGE] Starting DLL Hashing Artifact Collection."
-    write-host -fore Gray -back black $vartempstring
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black $vartempstring
+    }
     $vartempstring >> $SavedLogFile
 
     $var_InfoDLLHash_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_DLLHash.csv"
@@ -2336,7 +2507,10 @@ function function_Triage_Meta-Blue_DLLSEARCHORDER
 ### Credit Goes to newhandle's Meta-Blue.ps1 project ###
 {
     $vartempstring = "[TRIAGE] Starting DLL Search Order Hijacking Information Collection."
-    write-host -fore Gray -back black $vartempstring
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black $vartempstring
+    }
     $vartempstring >> $SavedLogFile
 
     $var_InfoWin32_DLLSearchOrderHijack_csv = $SavedForensicArtifactsCSV + $computername + "_Host_Info.Win32_DLLSearchOrderHijack.csv"
@@ -2345,20 +2519,25 @@ function function_Triage_Meta-Blue_DLLSEARCHORDER
 
 Function Function_RIP_Schedule_Tasks
 {
-
     try
     {
         $vartempstring = "[TRIAGE] Starting Scheduled Task Collection."
-        write-host -fore Gray -back black $vartempstring
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black $vartempstring
+        }
         $vartempstring >> $SavedLogFile
         
         $ForensicFileStoreScheduledTasks = $SavedForensicArtifacts + "Tasks/"
         $ForensicFileStoreScheduledTasksFile = $ForensicFileStoreScheduledTasks + $computername + "scheduledtasks_rip.csv"
-        Get-ScheduledTask -Verbose | Format-List | export-csv -NoTypeInformation -Verbose -Append $ForensicFileStoreScheduledTasksFile
+        Get-ScheduledTask -Verbose | export-csv -Verbose -NoTypeInformation -Append $ForensicFileStoreScheduledTasksFile
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Failed to Pull and Save Scheduled Tasks."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Failed to Pull and Save Scheduled Tasks."
+        }
         function_failwhale
         clear
     }
@@ -2370,7 +2549,10 @@ Function Function_RIP_Event_Logs
     try
     {
         $vartempstring = "[TRIAGE] Starting Event Log Collection."
-        write-host -fore Gray -back black $vartempstring
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black $vartempstring
+        }
         $vartempstring >> $SavedLogFile
 
         $windowsversioncheck = (Get-CimInstance CIM_OperatingSystem | select -ExpandProperty version).Split(".")[0]
@@ -2383,7 +2565,10 @@ Function Function_RIP_Event_Logs
             }
             catch
             {
-                write-host -fore Red -back black "[ERROR] Failed to Copy Event Log Files."
+                if ($env_verbose -eq "V")
+                {
+                    write-host -fore Red -back black "[ERROR] Failed to Copy Event Log Files."
+                }
                 function_failwhale
                 clear
             }
@@ -2397,7 +2582,10 @@ Function Function_RIP_Event_Logs
             }
             catch
             {
-                write-host -fore Red -back black "[ERROR] Failed to Copy Event Log Files."
+                if ($env_verbose -eq "V")
+                {
+                    write-host -fore Red -back black "[ERROR] Failed to Copy Event Log Files."
+                }
                 function_failwhale
                 clear
             }
@@ -2414,7 +2602,10 @@ Function Function_RIP_Event_Logs
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Failed to Copy Event Logs."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Failed to Copy Event Logs."
+        }
         function_failwhale
         clear
     }
@@ -2439,7 +2630,10 @@ Function Function_RIP_RDP_BITMAP
                 }
                 catch
                 {
-                    write-host -back black -fore yellow "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
+                    if ($env_verbose -eq "V")
+                    {
+                        write-host -back black -fore yellow "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
+                    }
                     $RDPArtificatWARNText = "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
                     echo $RDPArtificatWARNText >> $SavedLogFile
                     function_failwhale
@@ -2455,7 +2649,10 @@ Function Function_RIP_RDP_BITMAP
                 }
                 catch
                 {
-                    write-host -back black -fore yellow "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
+                    if ($env_verbose -eq "V")
+                    {
+                        write-host -back black -fore yellow "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
+                    }
                     $RDPArtificatWARNText = "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
                     echo $RDPArtificatWARNText >> $SavedLogFile
                     function_failwhale
@@ -2475,7 +2672,10 @@ Function Function_RIP_RDP_BITMAP
                 }
                 catch
                 {
-                    write-host -back black -fore yellow "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
+                    if ($env_verbose -eq "V")
+                    {
+                        write-host -back black -fore yellow "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
+                    }
                     $RDPArtificatWARNText = "[WARN] User Name: " + $CurrentUsernameRDP + " either has not used RDP, you don't have permissions, or there was an unspecified error."
                     echo $RDPArtificatWARNText >> $SavedLogFile
                     function_failwhale
@@ -2486,7 +2686,10 @@ Function Function_RIP_RDP_BITMAP
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Failed to Copy RDP Bitmap Cache Files."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Failed to Copy RDP Bitmap Cache Files."
+        }
         function_failwhale
         clear
     }        
@@ -2523,8 +2726,12 @@ Function Function_RIP_COMMON_AUTORUNS
     }
     catch
     {
+        $vartempstring = "[INFO] SHIMCACHE Property: (SdbTime) Does Not Appear To Exist."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black $vartempstring
+        }
         $vartempstring = "[ERROR] Failed To Pull Information For Various HUNT Techniques."
-        write-host -fore Red -back black $vartempstring
         $vartempstring >> $SavedLogFile
         function_failwhale
         clear
@@ -2545,16 +2752,55 @@ Function Function_RIP_SHIMCACHE
             $vartempstring >> $SavedLogFile
 
             $var_InfoWin32_Reg_ShimCache_Main = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_Main.csv"
-            $var_RIP_SHIMCACHE_MAIN = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_Main
+            $var_RIP_SHIMCACHE_MAIN_Test = Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" 
+            if ($var_RIP_SHIMCACHE_MAIN_Test -eq "True")
+            {
+                $var_RIP_SHIMCACHE_MAIN = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | export-csv -Verbose -Append $var_InfoWin32_Reg_ShimCache_Main
+                $var_InfoWin32_Reg_ShimCache_ACC = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_ACC.csv"
+                try
+                {
+                    $var_RIP_SHIMCACHE_ACC = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty AppCompatCache | export-csv -Verbose -Append $var_InfoWin32_Reg_ShimCache_ACC
+                }
+                catch
+                {
+                    $vartempstring = "[INFO] SHIMCACHE Property: (AppCompatCache) Does Not Appear To Exist."
+                    if ($env_verbose -eq "V")
+                    {
+                        write-host -fore Gray -back black $vartempstring
+                    }
+                    $vartempstring >> $SavedLogFile
+                }
 
-            $var_InfoWin32_Reg_ShimCache_ACC = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_ACC.csv"
-            $var_RIP_SHIMCACHE_ACC = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty AppCompatCache | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_ACC
+                $var_InfoWin32_Reg_ShimCache_CMB = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_CMB.csv"
+                try
+                {
+                $var_RIP_SHIMCACHE_CMB = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty CacheMainSDB | export-csv -Verbose -Append $var_InfoWin32_Reg_ShimCache_CMB
+                }
+                catch
+                {
+                    $vartempstring = "[INFO] SHIMCACHE Property: (CacheMainSDB) Does Not Appear To Exist."
+                    if ($env_verbose -eq "V")
+                    {
+                        write-host -fore Gray -back black $vartempstring
+                    }
+                    $vartempstring >> $SavedLogFile
+                }
 
-            $var_InfoWin32_Reg_ShimCache_CMB = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_CMB.csv"
-            $var_RIP_SHIMCACHE_CMB = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty CacheMainSDB | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_CMB
-
-            $var_InfoWin32_Reg_ShimCache_ST = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_ST.csv"
-            $var_RIP_SHIMCACHE_ST = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty SdbTime | export-csv -NoTypeInformation -Verbose -Append $var_InfoWin32_Reg_ShimCache_ST
+                $var_InfoWin32_Reg_ShimCache_ST = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_ST.csv"
+                try
+                {
+                    $var_RIP_SHIMCACHE_ST = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | Select-Object AppCompatCache -ExpandProperty SdbTime | export-csv -Verbose -Append $var_InfoWin32_Reg_ShimCache_ST
+                }
+                catch
+                {
+                    $vartempstring = "[INFO] SHIMCACHE Property: (SdbTime) Does Not Appear To Exist."
+                    if ($env_verbose -eq "V")
+                    {
+                        write-host -fore Gray -back black $vartempstring
+                    }
+                    $vartempstring >> $SavedLogFile
+                }
+            }
         }
         catch
         {
@@ -2569,8 +2815,11 @@ Function Function_RIP_SHIMCACHE
     {
         try
         {
-            $vartempstring = "[TRIAGE] Starting Collection of Info For SHIMCache Artifacts (Windows XP-)."
-            write-host -fore Gray -back black $vartempstring
+            $vartempstring = "[TRIAGE] Starting Collection of Info For SHIMCache Artifacts (Windows XP =>)."
+            if ($env_verbose -eq "V")
+            {
+                write-host -fore Gray -back black $vartempstring
+            }
             $vartempstring >> $SavedLogFile
 
             $var_InfoWin32_Reg_ShimCache_Main = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_Main.csv"
@@ -2588,7 +2837,10 @@ Function Function_RIP_SHIMCACHE
         catch
         {
             $vartempstring = "[ERROR] Failed To Pull SHIMCache Artifacts."
-            write-host -fore Red -back black $vartempstring
+            if ($env_verbose -eq "V")
+            {
+                write-host -fore Red -back black $vartempstring
+            }
             $vartempstring >> $SavedLogFile
             function_failwhale
             clear
@@ -2621,9 +2873,12 @@ Function Function_RIP_Alt_Data_Streams
         }
         catch
         {
-            write-host -fore Red -back black "[ERROR] Failed to Query Alternate Data Streams and Save Into A File."
-            function_failwhale
-            clear
+            if ($env_verbose -eq "V")
+                {
+                write-host -fore Red -back black "[ERROR] Failed to Query Alternate Data Streams and Save Into A File."
+                function_failwhale
+                clear
+            }
         }
     }
     ##cmd.exe /c start dir /s /r %SYSTEMROOT%\ | find ":DATA" ## Does not Pipe Within Powershell Properly
@@ -2635,7 +2890,10 @@ Function Function_RIP_VSS_INFO
     try
     {
         $vartempstring = "[TRIAGE] Starting Collection of Info For Volume Shadow Copies."
-        write-host -fore Gray -back black $vartempstring
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black $vartempstring
+        }
         $vartempstring >> $SavedLogFile
 
         $var_InfoWin32_VSS_Copies = $SavedForensicArtifactsCSV + $computername + "_VolumeShadow_Info.Win32_VSS_Copies.csv"
@@ -2678,7 +2936,10 @@ Function Function_RIP_VSS_INFO
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Failed to Query Volume Shadow Copies."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Failed to Query Volume Shadow Copies."
+        }
         function_failwhale
         clear
     }
@@ -2767,8 +3028,11 @@ Function Function_RIP_TRIAGE_SELECTOR
     }
     if ($var_CollectionPlanPrompt_Triage -eq "9")
     {
-        write-host -fore Gray -back black "[INFO] Skipping Additional TRIAGE of the Device?"
-        echo "[INFO] Skipping Additional TRIAGE of the Device?"  >> $SavedLogFile
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black "[INFO] Skipping Additional TRIAGE of the Device."
+        }
+        echo "[INFO] Skipping Additional TRIAGE of the Device."  >> $SavedLogFile
         Function_Get-DiskInfoMain
     }
     if (($var_CollectionPlanPrompt_Triage -ne "1") -and ($var_CollectionPlanPrompt_Triage -ne "2") -and ($var_CollectionPlanPrompt_Triage -ne "3") -and ($var_CollectionPlanPrompt_Triage -ne "9"))
@@ -2794,7 +3058,10 @@ Function Function_RIP_TRIAGE_MAIN
     }
     if ($var_CollectionPlanPrompt_Triage_Main -eq "NO")
     {
-        write-host -fore Gray -back black "[INFO] Skipping Additional TRIAGE of the Device."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black "[INFO] Skipping Additional TRIAGE of the Device."
+        }
         echo "[INFO] Skipping Additional TRIAGE of the Device?"  >> $SavedLogFile
         Function_Get-DiskInfoMain
     }
@@ -2884,7 +3151,10 @@ Function Function_Get-DiskSMARTInfo
                 $LineOut = "[DISK] Drive [" + $Iteration + "] Looks Good" >> $SavedLogFile
                 $var_DriveCallNumber = $Iteration - 1
                 Function_Get_DiskInfoSpecifics
-                $LineOut
+                if ($env_verbose -eq "V")
+                {
+                    $LineOut                    
+                }
                 $Iteration +=  1
             }
         }
@@ -2892,7 +3162,11 @@ Function Function_Get-DiskSMARTInfo
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Could Not Pull SMART Info" >> $SavedLogFile
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Could Not Pull SMART Info"
+        }
+        echo "[ERROR] Could Not Pull SMART Info" >> $SavedLogFile
         pause
         function_failwhale
         clear
@@ -2981,7 +3255,10 @@ Function Function_Get_DiskInfoSpecifics
     }
     catch
     {
-        write-host -fore Red -back black "[ERROR] Could Not Pull Specific Drive Info" 
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Red -back black "[ERROR] Could Not Pull Specific Drive Info" 
+        }
         echo "[ERROR] Could Not Pull Specific Drive Info" >> $SavedLogFile
         function_failwhale
         clear
@@ -3001,30 +3278,38 @@ Function Function_CollectionPlanPrompt
     {
         $var_DriveNumber >> $SavedVarFTKFile
         $var_CollectionSizePlanadd >> $SavedVarFile
-        write-host -fore Gray -back black "-----------------------------------------------------"
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore Gray -back black "-----------------------------------------------------"
+        }
     }
     if ($var_CollectionPlanPrompt -eq "NO")
     {
-        $string_CollectionNoPromptResponse = "[INFO] Skipping Drive: [" + $var_DriveNumber + "]."
-        write-host -fore Gray -back black $string_CollectionNoPromptResponse
-        write-host -fore Gray -back black "-----------------------------------------------------"
- 
+        if ($env_verbose -eq "V")
+        {
+            $string_CollectionNoPromptResponse = "[INFO] Skipping Drive: [" + $var_DriveNumber + "]."
+            write-host -fore Gray -back black $string_CollectionNoPromptResponse
+            write-host -fore Gray -back black "-----------------------------------------------------"
+        }
     }
     if ($var_CollectionPlanPrompt -ne "YES")
     {
         if ($var_CollectionPlanPrompt -ne "No")
         {
-        write-host -fore Red -back black "[ERROR] Your Response was not Yes or No"
-        function_failwhale
-        clear
-        function_CollectionPlanPrompt
+            write-host -fore Red -back black "[ERROR] Your Response was not Yes or No"
+            function_failwhale
+            clear
+            function_CollectionPlanPrompt
         }
     }            
 }
 
 Function Function_Full_Disk_Plan
 {
-    write-host -fore Gray -back black "--Generating Forensic Image Plan--"
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black "--Generating Forensic Image Plan--"
+    }
     echo "--Generating Forensic Image Plan--" >> $SavedLogFile
     ForEach ($line in (get-content $SavedVarFile))
     {
@@ -3041,14 +3326,16 @@ Function Function_Full_Disk_Plan
 
     if ($var_CollectionPlanPromptTextConfirm -eq "YES")
     {
-
         Del $SavedVarFile
         Function_Full_Disk_Collect
     }
     if ($var_CollectionPlanPromptTextConfirm -eq "NO")
     {
         Del $SavedVarFile
-        write-host -fore yellow -back black "[INFO] Restarting Collection Plan Process."
+        if ($env_verbose -eq "V")
+        {
+            write-host -fore yellow -back black "[INFO] Restarting Collection Plan Process."
+        }
         clear
         Function_Get-DiskInfoMain
     }
@@ -3056,10 +3343,10 @@ Function Function_Full_Disk_Plan
     {
         if ($var_CollectionPlanPromptTextConfirm -ne "No")
         {
-        write-host -fore Red -back black "[ERROR] Your Response was not Yes or No."
-        function_failwhale
-        clear
-        Function_Get-DiskInfoMain
+            write-host -fore Red -back black "[ERROR] Your Response was not Yes or No."
+            function_failwhale
+            clear
+            Function_Get-DiskInfoMain
         }
     }      
 }
@@ -3071,16 +3358,22 @@ Function Function_Full_Disk_Collect
         $StoredForensicDiskLocation = $StoredForensicLocation + "\Disk\"
         $DiskVarNumber = $line - 1
         $DiskCollectVar = "\\.\PHYSICALDRIVE" + $DiskVarNumber
-        $DiskCollectVar
         $StoredForensicDiskLocationStore = $StoredForensicDiskLocation
         $StoredForensicDiskLocationStoreFile = $StoredForensicDiskLocationStore + "DiskCollect_" + $DiskVarNumber
-        try
+        $var_StaredForensicDiskLocationCheck = Test-Path -path $StoredForensicDiskLocationStore
+        if ($var_StaredForensicDiskLocationCheck -eq $FALSE)
         {
-            mkdir $StoredForensicDiskLocationStore
-        }
-        catch
-        {
-            echo "Folder Already Created"
+            try
+            {
+                mkdir $StoredForensicDiskLocationStore
+            }
+            catch
+            {
+                if ($env_verbose -eq "V")
+                {
+                    write-host -fore Yellow -back black "[INFO] Folder Already Created."
+                }
+            }
         }
         cmd.exe /c start ./src/ftk/ftkimager.exe --verify $DiskCollectVar $StoredForensicDiskLocationStoreFile
     }
@@ -3089,7 +3382,28 @@ Function Function_Full_Disk_Collect
 Function Function_Get-DiskInfoMain
 {
     clear
-    Function_Get-DiskSMARTInfo
+    $agreement1string = "[PROMPT] Do You Want To Try And Pull Full Disk Images?"
+    write-host -fore white -back black $agreement1string
+    $agreement1 = Read-Host -Prompt '[Yes/No]'
+    if ($agreement1 -eq "Yes")
+    {
+        Function_Get-DiskSMARTInfo
+    }
+    if ($agreement1 -eq "No")
+    {
+        write-host -fore Gray -back black "[INFO] Ending Stack Now"
+        pause -s 3
+        clear
+        function_EndClearCleanUp
+    }
+    else
+    {
+        write-host -fore Red -back black "$agreement1 is not a valid response."
+        write-host -fore Red -back black "[ERROR] Response must be either a Yes or No"
+        function_failwhale
+        pause -s 3
+        Function_Get-DiskInfoMain
+    }
 }
 
 ######################################################################
@@ -3108,20 +3422,29 @@ function function_Post_Processing_JSON_Conversion
 
 function function_EndClearCleanUp
 {
-    write-host -fore Gray -back black "[FIN] Staring Cleanup And Ending Processes"
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black "[FIN] Staring Cleanup And Ending Processes"
+    }
     echo "[FIN] Staring Cleanup And Ending Processes" >> $SavedLogFile
 
-    write-host -fore Gray -back black "[FIN] Ending Network Tracing"
+    if ($env_verbose -eq "V")
+    {
+        write-host -fore Gray -back black "[FIN] Ending Network Tracing"
+    }
     echo "[FIN] Ending Network Tracing" >> $SavedLogFile
     
     function_Post_Processing_JSON_Conversion    
     netsh trace stop
-    echo "----------- FIN ----------" >> $SavedLogFile
+    if ($env_verbose -eq "v")
+    {
+        echo "----------- FIN ----------" >> $SavedLogFile
+    }
     function_fin
     pause
 }
 
-ErrorActionPreference = 'Inquire'
+$ErrorActionPreference = 'Inquire'
 Function_Agreement
 
 
