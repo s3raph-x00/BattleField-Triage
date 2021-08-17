@@ -15,13 +15,16 @@ SET bitness=%PROCESSOR_ARCHITECTURE%
 SET sessionsFolder=RedLine
 SET analysisFolderCommonName=AnalysisSession
 SET auditsFolder=Audits
+type ..\..\%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%\var_timehack > ..\..\%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%\var_timehacktime
+SET /p TIMEHACK=< ..\..\%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%\var_timehacktime
 
 IF NOT EXIST "%agent64%" GOTO :failed
 REM IF NOT EXIST "%agent32%" GOTO :failed
 IF NOT EXIST "%script%" GOTO :failed
 
+
 IF "%1"=="" (
-	SET "outputdir=..\..\%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%"
+	SET "outputdir=..\..\%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%\%TIMEHACK%\"
 	GOTO :usedefault
 )
 
