@@ -1292,6 +1292,8 @@ function function_InherentScriptingLogName
             $SavedVarFTKFile = $CollectionDate + "\" + $ScriptStartTime + "\" + $StoredVariables + "_ftk"
             $SavedTempFile = $CollectionDate + "\" + $ScriptStartTime + "\" + $SavedTemp
             $SavedSelectedDrive = $CollectionDate + "\" + $ScriptStartTime + "\" + $StoredSelecteDrive
+            $StoredTimeHack = $CollectionDate + "\" + "var_timehack"
+            cmd.exe /c echo $ScriptStartTime > $StoredTimeHack
             clear
             function_Artifact_Storage_TARTARUS
         }
