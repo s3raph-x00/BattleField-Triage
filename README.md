@@ -46,6 +46,7 @@ Note: Store Binaries (And Their Associated DLLs/Files) In The Following Folder S
 #         ./src/Surge/surgecollect.exe<br/>
 #         ./src/winpmem.exe<br/>
 #         ./src/memoryze/Memoryze.exe<br/>
+#         ./src/ShadowSpawn.exe<br/>
 </blockquote>
 
 ProTip: _./src/man/_ refers to the Mandiant Redline Collector folder.
@@ -109,3 +110,4 @@ ramcapture: https://belkasoft.com/ram-capturer <br />
 Surge Collect Pro (Not Free): https://www.volexity.com/products-overview/surge/ <br />
 FTK Imager (CLI): https://accessdata.com/product-download/ftk-imager-version-4-5 <br />
 RedLine Collector: https://www.fireeye.com/services/freeware/redline.html <br />
+SpadowSpawn (Still Testing): https://github.com/candera/shadowspawn <br />
