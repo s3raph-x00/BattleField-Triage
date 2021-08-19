@@ -1200,12 +1200,11 @@ function function_KatnissSalute
 ############################## PREAMP ################################
 ######################################################################
 
-
 function function_InherentScriptLogging
 {
-$ScriptStartDate = Get-Date –f "D-(yyyy-MM-dd)_T-(HH-mm-ss)"
-$ScriptStartTime = Get-Date –f "HH-mm-ss"
-$CollectionDate = Get-Date –f "yyyy-MM-dd"
+    $ScriptStartDate = Get-Date –f "D-(yyyy-MM-dd)_T-(HH-mm-ss)"
+    $ScriptStartTime = Get-Date –f "HH-mm-ss"
+    $CollectionDate = Get-Date –f "yyyy-MM-dd"
     $Prompt_Script_LocationString = "[PROMPT] Do You Want To Specify Where to Store Logs and Forensic Artifacts?"
     write-host -fore white -back black $Prompt_Script_LocationString 
     $Prompt_Script_Location = Read-Host -Prompt '[Yes/No]'
@@ -1213,39 +1212,31 @@ $CollectionDate = Get-Date –f "yyyy-MM-dd"
     {
         $string_fileoutputdir = '[PROMPT] Input the Directory to store logs'
         $fileoutputdir = Read-Host -Prompt "(i.e. Press [Enter] for the Current Directory './' or enter your choice: C:/Users/Administrator/Desktop)"
-        write-host -fore Gray -back $fileoutputdir 
-        if ($fileoutputdir)
+        $fileoutputdirbool = [string]::IsNullOrEmpty($fileoutputdir)
+        write-host -fore Gray -back Black $fileoutputdir 
+        if ($fileoutputdirbool -eq $False)
         {
             write-host -fore Gray -back black "[INFO] Finished with Directory Input, beginning to create file structure"
-            try
-            {
-                mkdir $fileoutputdir/$CollectionDate
-                function_InherentScriptingLogName
-            }
-            catch
-            {
-                write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $fileoutputdir
-                function_failwhale
-                clear
-            }
-        }
+                $var_Saved_File_Output_Script_Start = $fileoutputdir + "/" + $CollectionDate + "/" + $ScriptStartTime + "/"
+                $var_Saved_File_Output_Script_Start_bool = Test-Path $var_Saved_File_Output_Script_Start
+                if ($var_Saved_File_Output_Script_Start_bool -eq $False)
+                {
+                    mkdir $var_Saved_File_Output_Script_Start -ErrorAction SilentlyContinue
+                }
+                function_InherentScriptingLogName_Check
 
-        else
+        }
+        if ($fileoutputdirbool -eq $True)
         {
             $fileoutputdir = "./"
             write-host -fore Gray -back Black "[INFO] Finished with Directory Input, beginning to create file structure"
-            try
-            {
-                mkdir $fileoutputdir/$CollectionDate/
-                mkdir $fileoutputdir/$CollectionDate/$ScriptStartTime/
-                function_InherentScriptingLogName
-            }
-            catch
-            {
-                write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $fileoutputdir
-                function_failwhale
-                clear
-            }
+                $var_Saved_File_Output_Script_Start = $fileoutputdir + "/" + $CollectionDate + "/" + $ScriptStartTime + "/"
+                $var_Saved_File_Output_Script_Start_bool = Test-Path $var_Saved_File_Output_Script_Start
+                if ($var_Saved_File_Output_Script_Start_bool -eq $False)
+                {
+                    mkdir $var_Saved_File_Output_Script_Start -ErrorAction SilentlyContinue
+                }
+                function_InherentScriptingLogName_Check
         }
     }
 
@@ -1253,21 +1244,33 @@ $CollectionDate = Get-Date –f "yyyy-MM-dd"
     {
         $fileoutputdir = "./"
         write-host -fore Gray -back Black "[INFO] Finished with Directory Input, beginning to create file structure"
-        try
-        {
-            mkdir $fileoutputdir/$CollectionDate/
-            mkdir $fileoutputdir/$CollectionDate/$ScriptStartTime/
-            clear
-            function_InherentScriptingLogName
-        }
-        catch
-        {
-            write-host -back black -fore yellow "[WARN] Could Not Create Directory: " $fileoutputdir
-            function_failwhale
-            clear
-        }
+            $var_Saved_File_Output_Script_Start = $fileoutputdir + "/" + $CollectionDate + "/" + $ScriptStartTime + "/"
+            $var_Saved_File_Output_Script_Start_bool = Test-Path $var_Saved_File_Output_Script_Start
+            if ($var_Saved_File_Output_Script_Start_bool -eq $False)
+            {
+                mkdir $var_Saved_File_Output_Script_Start -ErrorAction SilentlyContinue
+            }
+            function_InherentScriptingLogName_Check
     }
 }
+
+function function_InherentScriptingLogName_Check
+{
+    $var_Saved_File_Output_Script_Start_bool = Test-Path $var_Saved_File_Output_Script_Start
+    if ($var_Saved_File_Output_Script_Start_bool -eq $True)
+    {
+        function_InherentScriptingLogName
+    }
+    else
+    {
+        write-host -back black -fore red "[ERROR] Directory:"  $fileoutputdir " was not created, going back to prompt. Check Permissions and/or User Input."
+        function_failwhale
+        pause
+        clear
+        function_InherentScriptLogging
+    }
+}
+
 
 function function_InherentScriptingLogName
 {
@@ -1317,7 +1320,11 @@ function function_Artifact_Storage_TARTARUS
     $SavedForensicArtifacts = $fileoutputdir + "\" + $CollectionDate + "\" + $ScriptStartTime + "\" + "Artifacts\"
     try
     {
-        mkdir $SavedForensicArtifacts
+        $var_SavedForensicArtifactsbool = Test-Path $SavedForensicArtifacts
+        if ($var_SavedForensicArtifactsbool -eq $FALSE)
+        {
+            mkdir $SavedForensicArtifacts
+        }
     }
     catch
     {
@@ -1327,7 +1334,11 @@ function function_Artifact_Storage_TARTARUS
     $SavedForensicArtifactsCSV = $SavedForensicArtifacts + "\CSV\"
     try
     {
-        mkdir $SavedForensicArtifactsCSV
+        $var_SavedForensicArtifactsbool_CSV = Test-Path $SavedForensicArtifactsCSV
+        if ($var_SavedForensicArtifactsbool_CSV -eq $FALSE)
+        {
+            mkdir $SavedForensicArtifactsCSV
+        }
     }
     catch
     {
@@ -1337,7 +1348,11 @@ function function_Artifact_Storage_TARTARUS
     $SavedForensicArtifactsJSON = $SavedForensicArtifacts + "\JSON\"
     try
     {
-        mkdir $SavedForensicArtifactsJSON
+        $var_SavedForensicArtifactsbool_JSON = Test-Path $SavedForensicArtifactsJSON
+        if ($var_SavedForensicArtifactsbool_JSON -eq $FALSE)
+        {
+            mkdir $SavedForensicArtifactsJSON
+        }
     }
     catch
     {
@@ -1347,7 +1362,11 @@ function function_Artifact_Storage_TARTARUS
     $SavedForensicArtifactsXML = $SavedForensicArtifacts + "\XML\"
     try
     {
-        mkdir $SavedForensicArtifactsXML
+        $var_SavedForensicArtifactsbool_XML = Test-Path $SavedForensicArtifactsXML
+        if ($var_SavedForensicArtifactsbool_XML -eq $FALSE)
+        {
+            mkdir $SavedForensicArtifactsXML
+        }
     }
     catch
     {
@@ -1357,7 +1376,11 @@ function function_Artifact_Storage_TARTARUS
     $SavedForensicArtifactsWMI = $SavedForensicArtifacts + "\WMI\"
     try
     {
-        mkdir $SavedForensicArtifactsWMI
+        $var_SavedForensicArtifactsbool_WMI = Test-Path $SavedForensicArtifactsWMI
+        if ($var_SavedForensicArtifactsbool_WMI -eq $FALSE)
+        {
+            mkdir $SavedForensicArtifactsWMI
+        }
     }
     catch
     {
@@ -1367,7 +1390,11 @@ function function_Artifact_Storage_TARTARUS
     $SavedForensicArtifactsTasks = $SavedForensicArtifacts + "\Tasks\"
     try
     {
-        mkdir $SavedForensicArtifactsTasks
+        $var_SavedForensicArtifactsbool_Tasks = Test-Path $SavedForensicArtifactsTasks
+        if ($var_SavedForensicArtifactsbool_Tasks -eq $FALSE)
+        {
+            mkdir $SavedForensicArtifactsTasks
+        }
     }
     catch
     {
@@ -1377,7 +1404,11 @@ function function_Artifact_Storage_TARTARUS
     $StoredForensicLocationNET = $StoredForensicLocation + "\Net\"
     try
     {
-        mkdir $StoredForensicLocationNET
+        $var_SavedForensicArtifactsbool_NET = Test-Path $StoredForensicLocationNET
+        if ($var_SavedForensicArtifactsbool_NET -eq $FALSE)
+        {
+            mkdir $StoredForensicLocationNET
+        }
     }
     catch
     {
@@ -1387,7 +1418,11 @@ function function_Artifact_Storage_TARTARUS
     $StoredForensicLocationWBEM = $StoredForensicLocation + "\WBEM\"
     try
     {
-        mkdir $StoredForensicLocationWBEM
+        $var_SavedForensicArtifactsbool_BEM = Test-Path $StoredForensicLocationWBEM
+        if ($var_SavedForensicArtifactsbool_BEM -eq $FALSE)
+        {
+            mkdir $StoredForensicLocationWBEM
+        }
     }
     catch
     {
@@ -1651,7 +1686,7 @@ Function Function_MemoryCollectionTools
                 $memoryfilenameprint = "[MEM] The memory capture file from winpmem is: " + $StoredForensicMEMLocationPMEM
                 $var_pagefileexists = ""
                 $var_pagefileexistsbool = Test-Path C:\pagefile.sys
-                if ($var_pagefileexistsbool -eq "TRUE")
+                if ($var_pagefileexistsbool -eq $TRUE)
                 {
                     $var_pagefileexists = " -p C:\pagefile.sys "
                 }
@@ -2323,7 +2358,7 @@ Function Function_RIP_TRIAGE
 
 
         $var_test_path_shell = test-path -Path "HKCU:\SOFTWARE\classes\ms-settings-shell\open\command"
-        if ($var_test_path_shell -eq "True")
+        if ($var_test_path_shell -eq $TRUE)
         {
             $var_InfoWin32_UACBypassFodHelper_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_UACBypassFodHelper.csv"
             Get-ItemProperty "HKCU:\SOFTWARE\classes\ms-settings-shell\open\command" | export-csv -NoTypeInformation -Append $var_InfoWin32_UACBypassFodHelper_csv
@@ -2336,7 +2371,7 @@ Function Function_RIP_TRIAGE
         }
 
         $var_test_path_time = test-path -Path "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*"
-        if ($var_test_path_time -eq "True")
+        if ($var_test_path_time -eq $TRUE)
         {
             $var_InfoWin32_NTP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_NTP_INFO.csv"
             Get-ItemProperty "HKLM:\System\CurrentControlSet\Services\W32Time\TimeProviders\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_NTP_INFO_csv
@@ -2349,7 +2384,7 @@ Function Function_RIP_TRIAGE
         }
 
         $var_test_path_consent = test-path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*"
-        if ($var_test_path_consent -eq "True")
+        if ($var_test_path_consent -eq $TRUE)
         {
             $var_InfoWin32_CAP_INFO_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_CAP_INFO.csv"
             Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\*\NonPackaged\*" | export-csv -NoTypeInformation -Append $var_InfoWin32_CAP_INFO_csv
@@ -2362,7 +2397,7 @@ Function Function_RIP_TRIAGE
         }
 
         $var_test_path_pipe = test-path -Path \\.\pipe\
-        if ($var_test_path_pipe -eq "True")
+        if ($var_test_path_pipe -eq $TRUE)
         {
             $var_InfoWin32_NAMEDPIPES_csv = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_NAMEDPIPES.csv"
             Get-ChildItem \\.\pipe\ | export-csv -NoTypeInformation -Append $var_InfoWin32_NAMEDPIPES_csv
@@ -2755,7 +2790,7 @@ Function Function_RIP_SHIMCACHE
 
             $var_InfoWin32_Reg_ShimCache_Main = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_Main.csv"
             $var_RIP_SHIMCACHE_MAIN_Test = Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" 
-            if ($var_RIP_SHIMCACHE_MAIN_Test -eq "True")
+            if ($var_RIP_SHIMCACHE_MAIN_Test -eq $TRUE)
             {
                 $var_RIP_SHIMCACHE_MAIN = Get-ItemProperty -Verbose -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache\" | export-csv -Verbose -Append $var_InfoWin32_Reg_ShimCache_Main
                 $var_InfoWin32_Reg_ShimCache_ACC = $SavedForensicArtifactsCSV + $computername + "_ShimCache_Info.Win32_Reg_ShimCache_ACC.csv"
@@ -3069,7 +3104,7 @@ Function Function_RIP_TRIAGE_MAIN
     }
     if ($var_CollectionPlanPrompt_Triage_Main -ne "YES")
     {
-        if ($var_CollectionPlanPrompt_Triage_Main -ne "No")
+        if ($var_CollectionPlanPrompt_Triage_Main -ne "NO")
         {
         write-host -fore Red -back black "[ERROR] Your Response Was Not YES or NO."
         function_failwhale
@@ -3201,7 +3236,7 @@ Function Function_Get_DiskInfoSpecifics
         $var_temp_disk_variable_allocatedsize = $var_temp_disk_variable.AllocatedSize
         if ($var_temp_disk_variable_computername -ne "")
         { 
-        ###############################This Does Not Display Correct Results For Some External/Remote Drives ##################################
+            ###############################This Does Not Display Correct Results For Some External/Remote Drives ##################################
             if ($var_temp_disk_variable_computername -ne $var_ComputerName)
             {
                 $var_temp_disk_variable_string_0 = "[DISK] Drive [" + $var_DriveNumber + "] appears to be remote. The location is: " + $var_temp_disk_variable_computername + " or: " + $var_temp_disk_variable_location
