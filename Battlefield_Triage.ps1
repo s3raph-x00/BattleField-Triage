@@ -3039,8 +3039,8 @@ Function Function_RIP_TRIAGE_SELECTOR
         Function_RIP_RDP_BITMAP
         Function_RIP_AMCACHE
         Function_RIP_SHIMCACHE
-        function_Triage_Meta-Blue_DLLSEARCHORDER
-        Function_Triage_Meta-Blue_ProcessHash
+        #Function_Triage_Meta-Blue_DLLSEARCHORDER
+        #Function_Triage_Meta-Blue_ProcessHash
         #Function_Triage_Meta-Blue_DriverHash
         #Function_Triage_Meta-Blue_DLLHash
         Function_Get-DiskInfoMain
@@ -3054,8 +3054,8 @@ Function Function_RIP_TRIAGE_SELECTOR
         Function_RIP_RDP_BITMAP
         Function_RIP_AMCACHE
         Function_RIP_SHIMCACHE
-        function_Triage_Meta-Blue_DLLSEARCHORDER
-        Function_Triage_Meta-Blue_ProcessHash
+        #Function_Triage_Meta-Blue_DLLSEARCHORDER
+        #Function_Triage_Meta-Blue_ProcessHash
         #Function_Triage_Meta-Blue_DriverHash
         #Function_Triage_Meta-Blue_DLLHash
         Function_RIP_Alt_Data_Streams
