@@ -58,29 +58,6 @@ ProTip: _./src/man/_ refers to the Mandiant Redline Collector folder.
        &#9746; Switches and Parametization<br/>
        &#9746; Testing<br/>
      - [ ] GUI   
-  2. Linux/Unix Python Script
-     - [ ] Core Functionality
-       - [ ] Additional Triage Sources   
-       - [ ] Switches and Parametization
-       - [ ] Testing
-     - [ ] GUI   
-  3. OSX Script
-     - [ ] Core Functionality
-       - [ ] Additional Triage Sources   
-       - [ ] Switches and Parametization
-       - [ ] Testing
-     - [ ] GUI   
-  4. Companion Analysis Tool
-     - [ ] Core Functionality
-       - [ ] MITRE ATT&CK Integration
-       - [ ] Testing
-     - [ ] GUI
-  5. ELK/Splunk Linkage Tool
-     - [ ] Core Functionality
-     - [ ] ELK Linkage
-     - [ ] SPLUNK Linkage
-     - [ ] Testing
-     - [ ] GUI
 
 ##### Legend:
 - - [X] - Completed <br />
@@ -90,10 +67,6 @@ ProTip: _./src/man/_ refers to the Mandiant Redline Collector folder.
 ##### Known Issues:
   1. Windows PowerShell Script
      - [ ] See Open Issues
-  2. Linux/Unix Python Script
-  3. OSX Script
-  4. Companion Analysis Tool
-  5. ELK/Splunk Linkage Tool
 
 ### Updating The Core Binaries
 
