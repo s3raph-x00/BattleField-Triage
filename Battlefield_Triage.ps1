@@ -25,7 +25,7 @@
 
 ######################################################################
 ### AUTHOR:      s3raph                                            ###
-### DATE:        07/01/2021                                        ###
+### DATE:        02/24/2025                                        ###
 ### VERSION:     v.42 (Beta)                                       ###
 ### SYNOPSIS:    Battle Field Triage Script Meant To Standardize   ###
 ###              collection and initial analysis.                  ###
