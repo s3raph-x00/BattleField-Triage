@@ -78,7 +78,7 @@ When updating various binaries (winpmem for example), ensure the name matches wh
    
 ### Where To Get The Core Binaries: <br />
 winpmem: https://github.com/Velocidex/WinPmem <br />
-memoryze: https://www.fireeye.com/services/freeware/memoryze.html <br />
+memoryze: [https://www.fireeye.com/services/freeware/memoryze.html](https://fireeye.market/apps/211368) <br />
 ramcapture: https://belkasoft.com/ram-capturer <br />
 Surge Collect Pro (Not Free): https://www.volexity.com/products-overview/surge/ <br />
 FTK Imager (CLI): https://accessdata.com/product-download/ftk-imager-version-4-5 <br />
