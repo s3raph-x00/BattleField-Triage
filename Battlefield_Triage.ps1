@@ -1026,7 +1026,6 @@ Function Function_RIP_Prefetch_and_Network
         echo "-----Service Output-----" >> $SavedInitialFile
         get-service -Verbose | Format-List * >> $SavedInitialFile
         # HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory
-        # Get-ChildItem C:\Windows\Prefetch 
     }
     catch
     {
@@ -1732,6 +1731,29 @@ Function Function_RIP_Schedule_Tasks
     }
 }
 
+## Shamelessly Taken from https://github.com/sandeepsharmap/PowerShell-Scripts/blob/master/Prefetch%20Files%20List.ps1 which appears to be a rip of PSRecon.
+Function Function_Prefetch_Rip
+{
+    $var_InfoWin32_Prefetch_txt = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_Prefetch.txt"
+    $var_InfoWin32_Prefetch_html = $SavedForensicArtifactsCSV + $computername + "_Hunt_Info.Win32_Prefetch.html"
+    $pfconf = (Get-ItemProperty "hklm:\system\currentcontrolset\control\session manager\memory management\prefetchparameters").EnablePrefetcher 
+    Switch -Regex ($pfconf) {
+        "[1-3]" {
+            $o = "" | Select-Object FullName, CreationTimeUtc, LastAccessTimeUtc, LastWriteTimeUtc
+            ls $env:windir\Prefetch\*.pf | % {
+                $o.FullName = $_.FullName;
+                $o.CreationTimeUtc = Get-Date($_.CreationTimeUtc) -format o;
+                $o.LastAccesstimeUtc = Get-Date($_.LastAccessTimeUtc) -format o;
+                $o.LastWriteTimeUtc = Get-Date($_.LastWriteTimeUtc) -format o;
+                $o
+            } | ConvertTo-Html -Fragment >> $var_InfoWin32_Prefetch_html
+        }
+        default {
+            echo "[INFO] Prefetch not enabled on ${env:COMPUTERNAME}" >> $var_InfoWin32_Prefetch_txt
+        }
+    }
+}
+
 Function Function_RIP_Event_Logs
 {
     $ForensicFileStoreEVT = $SavedForensicArtifacts + "\EVTx\"
@@ -2181,6 +2203,7 @@ Function Function_RIP_TRIAGE_SELECTOR
         Function_RIP_Event_Logs
         Function_RIP_Schedule_Tasks
         Function_Get-DiskInfoMain
+        Function_Prefetch_Rip
     }
     if ($var_CollectionPlanPrompt_Triage -eq "2")
     {
@@ -2196,6 +2219,7 @@ Function Function_RIP_TRIAGE_SELECTOR
         #Function_Triage_Meta-Blue_DriverHash
         #Function_Triage_Meta-Blue_DLLHash
         Function_Get-DiskInfoMain
+        Function_Prefetch_Rip
     }
     if ($var_CollectionPlanPrompt_Triage -eq "3")
     {
@@ -2214,6 +2238,7 @@ Function Function_RIP_TRIAGE_SELECTOR
         Function_RIP_VSS_INFO
         Function_Hash_All_Files_OS_DRIVE
         Function_Get-DiskInfoMain
+        Function_Prefetch_Rip
     }
     if ($var_CollectionPlanPrompt_Triage -eq "9")
     {
